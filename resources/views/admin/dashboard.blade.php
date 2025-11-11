@@ -1,36 +1,36 @@
-@extends('layouts.app')
+@extends('admin.layout')
 
 @section('content')
-<div class="min-h-screen bg-gray-50 py-8">
-  <div class="max-w-7xl mx-auto px-4">
-    <h1 class="text-3xl font-extrabold mb-6">Admin Dashboard</h1>
-    @if(session('success'))
-      <div class="bg-green-100 text-green-700 px-4 py-3 rounded mb-4">{{ session('success') }}</div>
-    @endif
+<div class="space-y-6">
+	<h1 class="text-2xl font-extrabold text-gray-800">Dashboard</h1>
 
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-      <a href="{{ route('booking.index') }}" class="block bg-white rounded shadow p-6 hover:shadow-lg transition">
-        <div class="text-gray-500 text-sm">Manajemen</div>
-        <div class="text-xl font-bold">Booking</div>
-      </a>
-      <a href="{{ route('fasilitas.index') }}" class="block bg-white rounded shadow p-6 hover:shadow-lg transition">
-        <div class="text-gray-500 text-sm">Master</div>
-        <div class="text-xl font-bold">Fasilitas</div>
-      </a>
-      <a href="{{ route('gedung.index') }}" class="block bg-white rounded shadow p-6 hover:shadow-lg transition">
-        <div class="text-gray-500 text-sm">Master</div>
-        <div class="text-xl font-bold">Gedung</div>
-      </a>
-    </div>
+	@if(session('success'))
+		<div class="bg-green-100 text-green-700 px-4 py-3 rounded">{{ session('success') }}</div>
+	@endif
 
-    <div class="mt-8 bg-white rounded shadow p-6">
-      <h2 class="text-lg font-semibold mb-4">Quick Actions</h2>
-      <div class="flex flex-wrap gap-3">
-        <a href="{{ route('booking.index') }}" class="px-4 py-2 bg-blue-600 text-white rounded">Lihat Semua Booking</a>
-        <a href="{{ route('fasilitas.create') }}" class="px-4 py-2 bg-indigo-600 text-white rounded">Tambah Fasilitas</a>
-      </div>
-    </div>
-  </div>
+	<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+		<div class="bg-white rounded-xl shadow p-4">
+			<div class="text-xs text-gray-500">Pengguna</div>
+			<div class="text-2xl font-extrabold text-blue-900">{{ $stats['users'] ?? '-' }}</div>
+		</div>
+		<div class="bg-white rounded-xl shadow p-4">
+			<div class="text-xs text-gray-500">Jadwal</div>
+			<div class="text-2xl font-extrabold text-blue-900">{{ $stats['bookings'] ?? '-' }}</div>
+		</div>
+		<div class="bg-white rounded-xl shadow p-4">
+			<div class="text-xs text-gray-500">Pembayaran Pending</div>
+			<div class="text-2xl font-extrabold text-blue-900">{{ $stats['payments_pending'] ?? '-' }}</div>
+		</div>
+		<div class="bg-white rounded-xl shadow p-4">
+			<div class="text-xs text-gray-500">Sewa Aktif</div>
+			<div class="text-2xl font-extrabold text-blue-900">{{ $stats['active_rentals'] ?? '-' }}</div>
+		</div>
+	</div>
+
+	<div class="bg-white rounded-xl shadow p-6">
+		<h2 class="text-lg font-semibold text-gray-800 mb-2">Ringkasan Terbaru</h2>
+		<p class="text-sm text-gray-500">Tidak ada ringkasan untuk saat ini.</p>
+	</div>
 </div>
 @endsection
 

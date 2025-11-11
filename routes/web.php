@@ -8,6 +8,8 @@ use App\Http\Controllers\FasilitasController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PublicController;
+use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\AdminController;
 
 /*
 |--------------------------------------------------------------------------
@@ -24,6 +26,10 @@ use App\Http\Controllers\PublicController;
 Route::get('/home', [PublicController::class, 'home'])->name('home');
 Route::get('/availability', [PublicController::class, 'availability'])->name('public.availability');
 Route::get('/quote', [PublicController::class, 'quote'])->name('public.quote');
+// Public sewa pages
+Route::view('/sewa/gedung', 'sewa.gedung')->name('public.sewa.gedung');
+Route::view('/sewa/fasilitas', 'sewa.fasilitas')->name('public.sewa.fasilitas');
+Route::get('/jadwal', [PublicController::class, 'jadwal'])->name('public.jadwal');
 
 // Guest only routes
 Route::middleware('guest')->group(function () {
@@ -54,6 +60,10 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/booking/{id}', [BookingController::class, 'destroy'])->name('booking.destroy');
     Route::get('/booking/{id}/invoice', [BookingController::class, 'invoice'])->name('booking.invoice');
     
+    // Payments
+    Route::get('/payments', [PaymentController::class, 'index'])->name('payments.index');
+    Route::post('/payments/{id}/upload', [PaymentController::class, 'uploadProof'])->name('payments.upload');
+    
     // Logout
     Route::post('/logout', [AuthController::class, 'logout'])->name('auth.logout');
 });
@@ -61,7 +71,10 @@ Route::middleware(['auth'])->group(function () {
 // Admin routes (admin only)
 Route::middleware(['auth', 'role:A'])->group(function () {
     // Admin Dashboard
-    Route::get('/admin', [DashboardController::class, 'index'])->name('admin.dashboard');
+    Route::get('/admin', [AdminController::class, 'index'])->name('admin.dashboard');
+    Route::get('/admin/users', [AdminController::class, 'usersIndex'])->name('admin.users.index');
+    Route::get('/admin/schedules', [AdminController::class, 'schedulesIndex'])->name('admin.schedules.index');
+    Route::get('/admin/rentals', [AdminController::class, 'rentalsIndex'])->name('admin.rentals.index');
     
     // Gedung management
     Route::get('/gedung', [GedungController::class, 'index'])->name('gedung.index');
@@ -89,4 +102,8 @@ Route::middleware(['auth', 'role:A'])->group(function () {
         \App\Models\Booking::where('id', $id)->update(['status' => '3']);
         return redirect()->back()->with('success', 'Booking ditolak.');
     })->name('admin.booking.reject');
+    
+    // Payment verification
+    Route::get('/admin/payments', [PaymentController::class, 'adminIndex'])->name('admin.payments.index');
+    Route::put('/admin/payments/{id}/status', [\App\Http\Controllers\PaymentController::class, 'adminMark'])->name('admin.payments.status');
 });

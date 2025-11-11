@@ -7,6 +7,10 @@ use App\Models\Facility;
 
 class FasilitasController extends Controller
 {
+    public function showPublic()
+    {
+        return view('sewa.fasilitas', ['title' => 'Full Set Dekorasi Wisuda']);
+    }
     public function index()
     {
         $data = [

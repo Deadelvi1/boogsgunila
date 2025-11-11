@@ -12,17 +12,23 @@
             <div class="hidden md:flex items-center space-x-6">
                 @auth
                     <a href="{{ route('dashboard') }}" class="text-gray-700 hover:text-blue-900 px-3 py-2 text-sm font-medium transition duration-300">Beranda</a>
-                    <a href="{{ route('dashboard') }}#fasilitas" class="text-gray-700 hover:text-blue-900 px-3 py-2 text-sm font-medium transition duration-300">Sewa</a>
-                    <a href="{{ route('dashboard') }}#jadwal" class="text-gray-700 hover:text-blue-900 px-3 py-2 text-sm font-medium transition duration-300">Jadwal</a>
-                    <a href="#tentang" class="text-gray-700 hover:text-blue-900 px-3 py-2 text-sm font-medium transition duration-300">Tentang</a>
+                    <a href="{{ route('public.sewa.gedung') }}" class="text-gray-700 hover:text-blue-900 px-3 py-2 text-sm font-medium transition duration-300">Sewa</a>
+                    <a href="{{ route('public.sewa.fasilitas') }}" class="text-gray-700 hover:text-blue-900 px-3 py-2 text-sm font-medium transition duration-300">Fasilitas</a>
+                    <a href="{{ route('public.jadwal') }}" class="text-gray-700 hover:text-blue-900 px-3 py-2 text-sm font-medium transition duration-300">Jadwal</a>
+                    <a href="{{ route('home') }}#tentang" class="text-gray-700 hover:text-blue-900 px-3 py-2 text-sm font-medium transition duration-300">Tentang</a>
                 @else
                     <a href="{{ route('home') }}" class="text-gray-700 hover:text-blue-900 px-3 py-2 text-sm font-medium transition duration-300">Beranda</a>
-                    <a href="{{ route('home') }}#sewa" class="text-gray-700 hover:text-blue-900 px-3 py-2 text-sm font-medium transition duration-300">Sewa</a>
-                    <a href="{{ route('home') }}#jadwal" class="text-gray-700 hover:text-blue-900 px-3 py-2 text-sm font-medium transition duration-300">Jadwal</a>
+                    <a href="{{ route('public.sewa.gedung') }}" class="text-gray-700 hover:text-blue-900 px-3 py-2 text-sm font-medium transition duration-300">Sewa</a>
+                    <a href="{{ route('public.sewa.fasilitas') }}" class="text-gray-700 hover:text-blue-900 px-3 py-2 text-sm font-medium transition duration-300">Fasilitas</a>
+                    <a href="{{ route('public.jadwal') }}" class="text-gray-700 hover:text-blue-900 px-3 py-2 text-sm font-medium transition duration-300">Jadwal</a>
                     <a href="{{ route('home') }}#tentang" class="text-gray-700 hover:text-blue-900 px-3 py-2 text-sm font-medium transition duration-300">Tentang</a>
                 @endauth
                 @auth
                     @if(auth()->user()->role === 'A')
+                        <a href="{{ route('admin.dashboard') }}" 
+                           class="text-gray-700 hover:text-blue-900 px-3 py-2 text-sm font-medium transition duration-300">
+                            Admin
+                        </a>
                         <a href="{{ route('gedung.index') }}" 
                            class="text-gray-700 hover:text-blue-900 px-3 py-2 text-sm font-medium transition duration-300">
                             Gedung
@@ -35,6 +41,10 @@
                     <a href="{{ route('booking.index') }}" 
                        class="text-gray-700 hover:text-blue-900 px-3 py-2 text-sm font-medium transition duration-300">
                         Booking
+                    </a>
+                    <a href="{{ route('payments.index') }}" 
+                       class="text-gray-700 hover:text-blue-900 px-3 py-2 text-sm font-medium transition duration-300">
+                        Pembayaran
                     </a>
                 @endauth
             </div>
@@ -106,13 +116,15 @@
             <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-gray-50 rounded-lg mt-2 border border-gray-200">
                 @auth
                     <a href="{{ route('dashboard') }}" class="text-gray-700 hover:text-blue-900 block px-3 py-2 rounded-md text-base font-medium transition duration-300">Beranda</a>
-                    <a href="{{ route('dashboard') }}#fasilitas" class="text-gray-700 hover:text-blue-900 block px-3 py-2 rounded-md text-base font-medium transition duration-300">Sewa</a>
-                    <a href="{{ route('dashboard') }}#jadwal" class="text-gray-700 hover:text-blue-900 block px-3 py-2 rounded-md text-base font-medium transition duration-300">Jadwal</a>
-                    <a href="#tentang" class="text-gray-700 hover:text-blue-900 block px-3 py-2 rounded-md text-base font-medium transition duration-300">Tentang</a>
+                    <a href="{{ route('public.sewa.gedung') }}" class="text-gray-700 hover:text-blue-900 block px-3 py-2 rounded-md text-base font-medium transition duration-300">Sewa</a>
+                    <a href="{{ route('public.sewa.fasilitas') }}" class="text-gray-700 hover:text-blue-900 block px-3 py-2 rounded-md text-base font-medium transition duration-300">Fasilitas</a>
+                    <a href="{{ route('public.jadwal') }}" class="text-gray-700 hover:text-blue-900 block px-3 py-2 rounded-md text-base font-medium transition duration-300">Jadwal</a>
+                    <a href="{{ route('home') }}#tentang" class="text-gray-700 hover:text-blue-900 block px-3 py-2 rounded-md text-base font-medium transition duration-300">Tentang</a>
                 @else
                     <a href="{{ route('home') }}" class="text-gray-700 hover:text-blue-900 block px-3 py-2 rounded-md text-base font-medium transition duration-300">Beranda</a>
-                    <a href="{{ route('home') }}#sewa" class="text-gray-700 hover:text-blue-900 block px-3 py-2 rounded-md text-base font-medium transition duration-300">Sewa</a>
-                    <a href="{{ route('home') }}#jadwal" class="text-gray-700 hover:text-blue-900 block px-3 py-2 rounded-md text-base font-medium transition duration-300">Jadwal</a>
+                    <a href="{{ route('public.sewa.gedung') }}" class="text-gray-700 hover:text-blue-900 block px-3 py-2 rounded-md text-base font-medium transition duration-300">Sewa</a>
+                    <a href="{{ route('public.sewa.fasilitas') }}" class="text-gray-700 hover:text-blue-900 block px-3 py-2 rounded-md text-base font-medium transition duration-300">Fasilitas</a>
+                    <a href="{{ route('public.jadwal') }}" class="text-gray-700 hover:text-blue-900 block px-3 py-2 rounded-md text-base font-medium transition duration-300">Jadwal</a>
                     <a href="{{ route('home') }}#tentang" class="text-gray-700 hover:text-blue-900 block px-3 py-2 rounded-md text-base font-medium transition duration-300">Tentang</a>
                 @endauth
                 @auth
@@ -129,6 +141,10 @@
                     <a href="{{ route('booking.index') }}" 
                        class="text-gray-700 hover:text-blue-900 block px-3 py-2 rounded-md text-base font-medium transition duration-300">
                         Booking
+                    </a>
+                    <a href="{{ route('payments.index') }}" 
+                       class="text-gray-700 hover:text-blue-900 block px-3 py-2 rounded-md text-base font-medium transition duration-300">
+                        Pembayaran
                     </a>
                     <hr class="border-gray-300">
                     <a href="{{ route('profile') }}" 

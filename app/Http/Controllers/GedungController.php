@@ -7,6 +7,10 @@ use App\Models\Gedung;
 
 class GedungController extends Controller
 {
+    public function showPublic()
+    {
+        return view('sewa.gedung', ['title' => 'Gedung Serba Guna']);
+    }
     public function index()
     {
         $data = [

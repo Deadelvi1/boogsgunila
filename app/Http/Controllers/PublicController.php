@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Fasilitas;
 use App\Models\Booking;
+use App\Models\Gedung;
 
 class PublicController extends Controller
 {
@@ -78,6 +79,32 @@ class PublicController extends Controller
             'base' => $base,
             'facilities' => $facilitiesTotal,
             'total' => $base + $facilitiesTotal,
+        ]);
+    }
+
+    public function jadwal(Request $request)
+    {
+        $type = $request->input('type'); // Semua, Wisuda, Konser, dll (mengacu ke event_type)
+        $date = $request->input('date');
+
+        $query = Booking::with('gedung')
+            ->whereIn('status', ['2']) // tampilkan yang disetujui
+            ->orderBy('date', 'asc');
+
+        if ($type && $type !== 'all') {
+            $query->where('event_type', $type);
+        }
+        if ($date) {
+            $query->whereDate('date', $date);
+        }
+
+        $items = $query->get();
+
+        return view('public.jadwal', [
+            'title' => 'Jadwal Acara di GSG Unila',
+            'items' => $items,
+            'filter_type' => $type ?? 'all',
+            'filter_date' => $date,
         ]);
     }
 }
