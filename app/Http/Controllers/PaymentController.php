@@ -17,10 +17,23 @@ class PaymentController extends Controller
 
 	public function adminIndex()
 	{
-		$payments = Payment::with(['booking' => function ($q) { $q->with('user','gedung'); }])->latest()->get();
+		$req = request();
+		$query = Payment::with(['booking' => function ($q) { $q->with('user','gedung'); }])->latest();
+		if ($q = $req->input('q')) {
+			$query->where(function($qq) use ($q) {
+				$qq->where('amount', 'like', "%$q%")
+				   ->orWhere('status', 'like', "%$q%");
+			})
+			->orWhereHas('booking', function($b) use ($q) {
+				$b->where('event_name', 'like', "%$q%")
+				  ->orWhereHas('user', function($u) use ($q){ $u->where('name', 'like', "%$q%"); });
+			});
+		}
+		$payments = $query->get();
 		return view('admin.payments', [
 			'title' => 'Verifikasi Pembayaran',
 			'payments' => $payments,
+			'q' => $q ?? null,
 		]);
 	}
 

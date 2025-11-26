@@ -18,12 +18,12 @@ class FasilitasController extends Controller
             'title' => 'List Fasilitas',
             'items' => Fasilitas::orderBy('nama')->get(),
         ];
-        return view('list_fasilitas', $data);
+        return view('admin.fasilitas.index', $data);
     }
 
     public function create()
     {
-        return view('create_fasilitas', ['title' => 'Create Fasilitas']);
+        return view('admin.fasilitas.create', ['title' => 'Tambah Fasilitas']);
     }
 
     public function store(Request $request)
@@ -42,7 +42,7 @@ class FasilitasController extends Controller
     public function edit($id)
     {
         $item = Fasilitas::findOrFail($id);
-        return view('edit_fasilitas', ['title' => 'Edit Fasilitas', 'item' => $item]);
+        return view('admin.fasilitas.edit', ['title' => 'Edit Fasilitas', 'item' => $item]);
     }
 
     public function update(Request $request, $id)
@@ -62,6 +62,11 @@ class FasilitasController extends Controller
     public function destroy($id)
     {
         $item = Fasilitas::findOrFail($id);
+        // Prevent deletion if fasilitas is used in any booking_fasilitas
+        $used = \App\Models\BookingFasilitas::where('fasilitas_id', $item->id)->exists();
+        if ($used) {
+            return redirect()->route('fasilitas.index')->with('error', 'Tidak dapat menghapus fasilitas karena sedang digunakan pada booking.');
+        }
         $item->delete();
         return redirect()->route('fasilitas.index')->with('success', 'Fasilitas berhasil dihapus.');
     }

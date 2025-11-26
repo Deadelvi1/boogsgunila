@@ -95,6 +95,11 @@
                         <label class="block text-sm font-medium">Kapasitas</label>
                         <input type="number" name="capacity" value="{{ old('capacity', request('capacity')) }}" class="mt-1 w-full border rounded px-3 py-2" min="1" required>
                     </div>
+                    <div>
+                        <label class="block text-sm font-medium">Nomor Telepon Pemesan</label>
+                        <input type="text" name="phone" value="{{ old('phone') }}" class="mt-1 w-full border rounded px-3 py-2" placeholder="0812xxxx" required>
+                        @error('phone')<p class="text-red-600 text-sm mt-1">{{ $message }}</p>@enderror
+                    </div>
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>

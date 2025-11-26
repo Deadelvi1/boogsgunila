@@ -49,6 +49,13 @@
                         @enderror
                     </div>
 
+                    <div>
+                        <label for="phone" class="block text-sm font-medium text-gray-700">Nomor Telepon</label>
+                        <input type="text" name="phone" id="phone" value="{{ old('phone', auth()->user()->phone) }}"
+                               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
+                        @error('phone')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
+                    </div>
+
                     <div class="border-t border-gray-200 pt-6 mt-6">
                         <h3 class="text-lg font-medium text-gray-900 mb-4">Ubah Password</h3>
                         <p class="text-sm text-gray-600 mb-4">Kosongkan field di bawah jika Anda tidak ingin mengubah password</p>

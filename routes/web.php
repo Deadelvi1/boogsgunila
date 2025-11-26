@@ -58,6 +58,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/', [BookingController::class, 'index'])->name('index');
         Route::get('/create', [BookingController::class, 'create'])->name('create');
         Route::post('/', [BookingController::class, 'store'])->name('store');
+    Route::put('/{id}/cancel', [BookingController::class, 'cancel'])->name('cancel');
         Route::get('/{id}/edit', [BookingController::class, 'edit'])->name('edit');
         Route::put('/{id}', [BookingController::class, 'update'])->name('update');
         Route::delete('/{id}', [BookingController::class, 'destroy'])->name('destroy');
@@ -105,6 +106,13 @@ Route::middleware(['auth', 'role:A'])->prefix('admin')->name('admin.')->group(fu
             return redirect()->back()->with('success', 'Booking ditolak.');
         })->name('reject');
     });
+
+    // Admin create booking (uses admin layout)
+    Route::get('/booking/create', [AdminController::class, 'bookingCreate'])->name('booking.create');
+    Route::post('/booking', [AdminController::class, 'bookingStore'])->name('booking.store');
+    Route::get('/booking/{id}/edit', [AdminController::class, 'bookingEdit'])->name('booking.edit');
+    Route::put('/booking/{id}', [AdminController::class, 'bookingUpdate'])->name('booking.update');
+    Route::get('/booking/{id}/invoice', [AdminController::class, 'bookingInvoice'])->name('booking.invoice');
     
     // Payment Verification
     Route::prefix('payments')->name('payments.')->group(function () {

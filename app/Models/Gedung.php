@@ -15,6 +15,7 @@ class Gedung extends Model
         'nama',
         'lokasi',
         'kapasitas',
+        'harga',
         'deskripsi',
     ];
 

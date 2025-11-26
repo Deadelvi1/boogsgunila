@@ -23,6 +23,7 @@ class ProfileController extends Controller
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email,' . $user->id],
+            'phone' => ['nullable', 'string', 'max:30'],
             'current_password' => ['required_with:password', 'nullable', function ($attribute, $value, $fail) use ($user) {
                 if (!Hash::check($value, $user->password)) {
                     $fail('Password saat ini tidak sesuai.');
@@ -33,6 +34,7 @@ class ProfileController extends Controller
 
         $user->name = $request->name;
         $user->email = $request->email;
+    $user->phone = $request->phone;
 
         if ($request->filled('password')) {
             $user->password = Hash::make($request->password);

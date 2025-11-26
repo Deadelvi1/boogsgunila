@@ -56,6 +56,7 @@ class BookingController extends Controller
             'event_name' => 'required|string|max:255',
             'event_type' => 'required|string|max:100',
             'capacity' => 'required|integer|min:1',
+            'phone' => 'required|string|max:30',
             'date' => 'required|date',
             'end_date' => 'nullable|date|after_or_equal:date',
             'start_time' => 'required|date_format:H:i',
@@ -107,6 +108,7 @@ class BookingController extends Controller
             'event_name' => $request->input('event_name'),
             'event_type' => $request->input('event_type'),
             'capacity' => $request->input('capacity'),
+            'phone' => $request->input('phone'),
             'date' => $request->input('date'),
             'end_date' => $request->input('end_date'),
             'start_time' => $request->input('start_time'),
@@ -134,10 +136,23 @@ class BookingController extends Controller
         }
 
         // Estimasi biaya: durasi (jam) * BASE_RATE + total fasilitas
+        // Calculate duration and amount. Prefer gedung->harga (per day) when available.
         $start = strtotime($request->input('start_time'));
         $end = strtotime($request->input('end_time'));
         $hours = max(1, ceil(($end - $start) / 3600));
-        $amount = ($hours * self::BASE_RATE_PER_HOUR) + $facilitiesTotal;
+        $startDate = strtotime($request->input('date'));
+        $endDate = strtotime($request->input('end_date') ?? $request->input('date'));
+        $days = (int) floor(($endDate - $startDate) / 86400) + 1;
+        if ($days < 1) { $days = 1; }
+
+        $gedungModel = Gedung::find($request->input('gedung_id'));
+        if ($gedungModel && !empty($gedungModel->harga) && $gedungModel->harga > 0) {
+            // harga is treated as per-day price
+            $amount = ($gedungModel->harga * $days) + $facilitiesTotal;
+        } else {
+            // fallback to hourly base rate
+            $amount = ($hours * self::BASE_RATE_PER_HOUR * $days) + $facilitiesTotal;
+        }
 
         \App\Models\Payment::create([
             'booking_id' => $booking->id,
@@ -186,13 +201,24 @@ class BookingController extends Controller
             $start = strtotime($booking->start_time);
             $end = strtotime($booking->end_time);
             $hours = max(1, ceil(($end - $start) / 3600));
-            
+
             $facilitiesTotal = 0;
             foreach ($booking->bookingFasilitas as $bf) {
                 $facilitiesTotal += ($bf->fasilitas->harga ?? 0) * $bf->jumlah;
             }
-            
-            $amount = ($hours * self::BASE_RATE_PER_HOUR) + $facilitiesTotal;
+
+            // days between date and end_date inclusive
+            $startDate = strtotime($booking->date);
+            $endDate = strtotime($booking->end_date ?? $booking->date);
+            $days = (int) floor(($endDate - $startDate) / 86400) + 1;
+            if ($days < 1) { $days = 1; }
+
+            $gedungModel = $booking->gedung;
+            if ($gedungModel && !empty($gedungModel->harga) && $gedungModel->harga > 0) {
+                $amount = ($gedungModel->harga * $days) + $facilitiesTotal;
+            } else {
+                $amount = ($hours * self::BASE_RATE_PER_HOUR * $days) + $facilitiesTotal;
+            }
             
             $payment = \App\Models\Payment::create([
                 'booking_id' => $booking->id,
@@ -219,7 +245,9 @@ class BookingController extends Controller
             'event_name' => 'required|string|max:255',
             'event_type' => 'required|string|max:100',
             'capacity' => 'required|integer|min:1',
+            'phone' => 'required|string|max:30',
             'date' => 'required|date',
+            'end_date' => 'nullable|date|after_or_equal:date',
             'start_time' => 'required|date_format:H:i',
             'end_time' => 'required|date_format:H:i|after:start_time',
             'fasilitas' => 'nullable|array',
@@ -235,14 +263,30 @@ class BookingController extends Controller
         $request->validate($validationRules);
 
         // Cek bentrok saat update (kecuali dirinya sendiri)
-        // Hanya booking dengan status 2 (disetujui) yang memblokir
+        // Hanya booking dengan status 2 (disetujui) yang memblokir jadwal
+        $startDate = $request->input('date');
+        $endDate = $request->input('end_date') ?? $startDate;
+
         $overlap = Booking::where('gedung_id', $request->input('gedung_id'))
-            ->where('date', $request->input('date'))
             ->where('id', '!=', $id)
             ->where('status', '2') // Hanya yang sudah disetujui (pembayaran terverifikasi)
-            ->where(function($q) use ($request) {
-                $q->where('start_time', '<', $request->input('end_time'))
-                  ->where('end_time', '>', $request->input('start_time'));
+            ->where(function($q) use ($startDate, $endDate, $request) {
+                $q->where(function($query) use ($startDate, $endDate) {
+                    // Check if booking date range overlaps
+                    $query->whereBetween('date', [$startDate, $endDate])
+                          ->orWhereBetween('end_date', [$startDate, $endDate])
+                          ->orWhere(function($q2) use ($startDate, $endDate) {
+                              $q2->where('date', '<=', $startDate)
+                                 ->where(function($q3) use ($endDate) {
+                                     $q3->whereNull('end_date')
+                                        ->orWhere('end_date', '>=', $endDate);
+                                 });
+                          });
+                })
+                ->where(function($timeQuery) use ($request) {
+                    $timeQuery->where('start_time', '<', $request->input('end_time'))
+                              ->where('end_time', '>', $request->input('start_time'));
+                });
             })
             ->exists();
         if ($overlap) {
@@ -258,7 +302,7 @@ class BookingController extends Controller
         
         // Only admin can change status
         $updateData = $request->only([
-            'gedung_id', 'event_name', 'event_type', 'capacity', 'date', 'start_time', 'end_time'
+            'gedung_id', 'event_name', 'event_type', 'capacity', 'phone', 'date', 'end_date', 'start_time', 'end_time'
         ]);
         
         if (auth()->user()->role === 'A') {
@@ -297,6 +341,34 @@ class BookingController extends Controller
         
         $booking->delete();
         return redirect()->route('booking.index')->with('success', 'Booking berhasil dihapus.');
+    }
+
+    /**
+     * User-initiated cancellation (soft logical cancel) - sets status to '3' and updates payment
+     */
+    public function cancel($id)
+    {
+        $booking = Booking::with('user')->findOrFail($id);
+
+        // Check authorization - user can only cancel their own bookings unless admin
+        if (auth()->user()->role !== 'A' && $booking->user_id !== auth()->id()) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        // Allow cancellation for non-completed bookings
+        if ($booking->status === '4') {
+            return redirect()->route('booking.index')->with('error', 'Tidak dapat membatalkan booking yang sudah selesai.');
+        }
+
+        $booking->update(['status' => '3']); // 3 = canceled
+
+        // If there is a payment, mark it canceled as well
+        $payment = \App\Models\Payment::where('booking_id', $booking->id)->first();
+        if ($payment) {
+            $payment->update(['status' => '3']);
+        }
+
+        return redirect()->route('booking.index')->with('success', 'Booking berhasil dibatalkan.');
     }
 }
 

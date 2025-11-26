@@ -17,6 +17,9 @@
 				<div class="md:col-span-3">
 					<p class="text-sm text-gray-500 mb-3">Detail Sewa</p>
 					<div class="grid sm:grid-cols-2 gap-y-2 text-sm">
+						<div class="font-semibold text-blue-900">Kontak</div>
+						<div>{{ $b->phone ?? ($b->user->phone ?? '-') }}</div>
+
 						<div class="font-semibold text-blue-900">Pemesan</div>
 						<div>{{ $b->user->name ?? '-' }} ({{ $b->user->email ?? '-' }})</div>
 						
@@ -40,10 +43,29 @@
 						<div>{{ $b->capacity }} orang</div>
 						
 						<div class="font-semibold text-blue-900">Tanggal</div>
-						<div>{{ \Carbon\Carbon::parse($b->date)->format('d F Y') }}</div>
+						<div>{{ \Carbon\Carbon::parse($b->date)->format('d F Y') }}@if($b->end_date && $b->end_date !== $b->date) - {{ \Carbon\Carbon::parse($b->end_date)->format('d F Y') }}@endif</div>
 						
 						<div class="font-semibold text-blue-900">Waktu</div>
 						<div>{{ $b->start_time }} - {{ $b->end_time }}</div>
+
+						<div class="font-semibold text-blue-900">Proposal</div>
+						<div>
+							@if($b->proposal_file)
+								<a href="{{ asset('storage/'.$b->proposal_file) }}" target="_blank" class="text-blue-700 underline">Lihat Proposal</a>
+							@else
+								<span class="text-gray-500">-</span>
+							@endif
+						</div>
+
+						<div class="font-semibold text-blue-900">Bukti Pembayaran</div>
+						<div>
+							@php $pay = \App\Models\Payment::where('booking_id', $b->id)->first(); @endphp
+							@if($pay && $pay->proof_file)
+								<a href="{{ asset('storage/'.$pay->proof_file) }}" target="_blank" class="text-blue-700 underline">Lihat Bukti Pembayaran</a>
+							@else
+								<span class="text-gray-500">-</span>
+							@endif
+						</div>
 						
 						@if($b->bookingFasilitas && $b->bookingFasilitas->count() > 0)
 						<div class="font-semibold text-blue-900">Fasilitas Disewa</div>
@@ -75,8 +97,8 @@
 					</div>
 				</div>
 				<div class="flex flex-col gap-2">
-					<a href="{{ route('booking.edit', $b->id) }}" class="w-full text-center bg-indigo-600 hover:bg-indigo-700 text-white rounded py-2 text-sm">Edit</a>
-					<a href="{{ route('booking.invoice', $b->id) }}" class="w-full text-center bg-blue-600 hover:bg-blue-700 text-white rounded py-2 text-sm">Lihat Invoice</a>
+					<a href="{{ route('admin.booking.edit', $b->id) }}" class="w-full text-center bg-indigo-600 hover:bg-indigo-700 text-white rounded py-2 text-sm">Edit</a>
+					<a href="{{ route('admin.booking.invoice', $b->id) }}" class="w-full text-center bg-blue-600 hover:bg-blue-700 text-white rounded py-2 text-sm">Lihat Invoice</a>
 					@if($b->status === '1')
 					<form action="{{ route('admin.booking.approve', $b->id) }}" method="POST">
 						@csrf @method('PUT')

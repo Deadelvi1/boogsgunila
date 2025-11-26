@@ -82,12 +82,38 @@
                         <label class="block text-sm font-medium">Kapasitas</label>
                         <input type="number" name="capacity" value="{{ old('capacity', $item->capacity) }}" class="mt-1 w-full border rounded px-3 py-2" min="1" required>
                     </div>
+                    <div>
+                        <label class="block text-sm font-medium">Nomor Telepon Pemesan</label>
+                        <input type="text" name="phone" value="{{ old('phone', $item->phone) }}" class="mt-1 w-full border rounded px-3 py-2" placeholder="0812xxxx" required>
+                        @error('phone')<p class="text-red-600 text-sm mt-1">{{ $message }}</p>@enderror
+                    </div>
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <label class="block text-sm font-medium">Tanggal</label>
-                        <input type="date" name="date" value="{{ old('date', $item->date) }}" class="mt-1 w-full border rounded px-3 py-2" required>
+                        <input type="date" name="date" id="date_start" value="{{ old('date', $item->date) }}" class="mt-1 w-full border rounded px-3 py-2" required>
                     </div>
+                    <div>
+                        <label class="block text-sm font-medium">Tanggal Selesai (opsional)</label>
+                        <input type="date" name="end_date" id="date_end" value="{{ old('end_date', $item->end_date) }}" class="mt-1 w-full border rounded px-3 py-2">
+                        <p class="text-xs text-gray-500 mt-1">Kosongkan jika hanya 1 hari</p>
+                    </div>
+
+                    <script>
+                        document.addEventListener('DOMContentLoaded', function() {
+                            const dateStart = document.getElementById('date_start');
+                            const dateEnd = document.getElementById('date_end');
+                            if (dateStart && dateEnd) {
+                                dateStart.addEventListener('change', function() {
+                                    dateEnd.setAttribute('min', this.value);
+                                    if (dateEnd.value && dateEnd.value < this.value) {
+                                        dateEnd.value = this.value;
+                                    }
+                                });
+                            }
+                        });
+                    </script>
+
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label class="block text-sm font-medium">Jam Mulai</label>
@@ -102,7 +128,7 @@
                 @if($item->proposal_file)
                     <div>
                         <label class="block text-sm font-medium">Proposal Saat Ini</label>
-                        <a href="{{ Storage::url($item->proposal_file) }}" class="text-blue-600 hover:underline" target="_blank">Lihat Proposal</a>
+                        <a href="{{ asset('storage/'.$item->proposal_file) }}" class="text-blue-600 hover:underline" target="_blank">Lihat Proposal</a>
                     </div>
                 @endif
                 <div>

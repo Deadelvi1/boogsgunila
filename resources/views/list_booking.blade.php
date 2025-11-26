@@ -35,7 +35,13 @@
                         <td class="p-3">{{ $item->user->name ?? '-' }}</td>
                         <td class="p-3">{{ $item->gedung->nama ?? '-' }}</td>
                         <td class="p-3">{{ $item->event_name }} ({{ $item->event_type }})</td>
-                        <td class="p-3">{{ $item->date }}</td>
+                        <td class="p-3">
+                            @if($item->end_date && $item->end_date !== $item->date)
+                                {{ $item->date }} - {{ $item->end_date }}
+                            @else
+                                {{ $item->date }}
+                            @endif
+                        </td>
                         <td class="p-3">{{ $item->start_time }} - {{ $item->end_time }}</td>
                         <td class="p-3">
                             <span class="px-2 py-1 rounded text-white 
@@ -53,6 +59,13 @@
                                     @method('DELETE')
                                     <button type="submit" class="px-3 py-1 bg-red-600 text-white rounded text-xs">Hapus</button>
                                 </form>
+                                @if(auth()->check() && auth()->user()->id === $item->user_id && $item->status !== '4')
+                                <form action="{{ route('booking.cancel', $item->id) }}" method="POST" onsubmit="return confirm('Batalkan booking ini?')" class="inline">
+                                    @csrf
+                                    @method('PUT')
+                                    <button type="submit" class="px-3 py-1 bg-red-400 text-white rounded text-xs">Batal</button>
+                                </form>
+                                @endif
                                 @if(auth()->check() && auth()->user()->role === 'A')
                                 <form action="{{ route('admin.booking.approve', $item->id) }}" method="POST" class="inline">
                                     @csrf

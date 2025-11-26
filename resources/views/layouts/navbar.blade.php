@@ -31,11 +31,7 @@
                         </a>
                         <a href="{{ route('gedung.index') }}" 
                            class="text-gray-700 hover:text-blue-900 px-3 py-2 text-sm font-medium transition duration-300">
-                            Gedung
-                        </a>
-                        <a href="{{ route('fasilitas.index') }}" 
-                           class="text-gray-700 hover:text-blue-900 px-3 py-2 text-sm font-medium transition duration-300">
-                            Fasilitas
+                            Gedung &amp; Fasilitas
                         </a>
                         <a href="{{ route('admin.payments.index') }}" 
                            class="text-gray-700 hover:text-blue-900 px-3 py-2 text-sm font-medium transition duration-300">

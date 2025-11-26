@@ -27,6 +27,12 @@
 				<a href="{{ route('admin.schedules.index') }}" class="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-blue-50 {{ request()->routeIs('admin.schedules.*') ? 'bg-blue-100 text-blue-900 font-semibold' : 'text-gray-700' }}"><i class="fa-solid fa-calendar"></i> Data Jadwal</a>
 				<a href="{{ route('admin.rentals.index') }}" class="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-blue-50 {{ request()->routeIs('admin.rentals.*') ? 'bg-blue-100 text-blue-900 font-semibold' : 'text-gray-700' }}"><i class="fa-solid fa-clipboard-list"></i> Detail Sewa</a>
 				<a href="{{ route('admin.payments.index') }}" class="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-blue-50 {{ request()->routeIs('admin.payments.*') ? 'bg-blue-100 text-blue-900 font-semibold' : 'text-gray-700' }}"><i class="fa-solid fa-file-invoice-dollar"></i> Verif Pembayaran</a>
+				<!-- Gedung & Fasilitas management -->
+				<div class="mt-2 border-t pt-2"></div>
+				<a href="{{ route('gedung.index') }}" class="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-blue-50 {{ request()->routeIs('gedung.*') ? 'bg-blue-100 text-blue-900 font-semibold' : 'text-gray-700' }}"><i class="fa-solid fa-building"></i> Gedung</a>
+				<a href="{{ route('gedung.create') }}" class="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-blue-50 {{ request()->routeIs('gedung.create') ? 'bg-blue-100 text-blue-900 font-semibold' : 'text-gray-700' }}"><i class="fa-solid fa-plus"></i> Tambah Gedung</a>
+				<a href="{{ route('fasilitas.index') }}" class="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-blue-50 {{ request()->routeIs('fasilitas.*') ? 'bg-blue-100 text-blue-900 font-semibold' : 'text-gray-700' }}"><i class="fa-solid fa-boxes-stacked"></i> Fasilitas</a>
+				<a href="{{ route('fasilitas.create') }}" class="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-blue-50 {{ request()->routeIs('fasilitas.create') ? 'bg-blue-100 text-blue-900 font-semibold' : 'text-gray-700' }}"><i class="fa-solid fa-plus"></i> Tambah Fasilitas</a>
 				<form method="POST" action="{{ route('auth.logout') }}" class="mt-4 px-3">
 					@csrf
 					<button class="w-full flex items-center gap-3 px-3 py-2 rounded-md text-red-600 hover:bg-red-50"><i class="fa-solid fa-arrow-right-from-bracket"></i> Logout</button>
@@ -39,10 +45,12 @@
 			<header class="bg-white border-b">
 				<div class="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between">
 					<div class="w-full max-w-xl">
-						<div class="relative">
-							<i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
-							<input type="text" placeholder="Cari..." class="w-full pl-10 pr-3 py-2 border rounded-lg focus:ring-1 focus:ring-blue-500">
-						</div>
+						<form method="GET" action="{{ url()->current() }}">
+							<div class="relative">
+								<i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+								<input type="text" name="q" value="{{ request('q') }}" placeholder="Cari..." class="w-full pl-10 pr-3 py-2 border rounded-lg focus:ring-1 focus:ring-blue-500">
+							</div>
+						</form>
 					</div>
 					@php
 						$avatarUrl = auth()->user()->profile_photo_url ?? asset('img/default-avatar.png');

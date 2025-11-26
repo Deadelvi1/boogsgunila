@@ -40,7 +40,14 @@
 					</td>
 					<td class="p-3">
 						@if($p->proof_file)
-							<a href="{{ asset('storage/'.$p->proof_file) }}" target="_blank" class="text-blue-700 underline">Lihat</a>
+							@php $ext = strtolower(pathinfo(storage_path('app/public/'.$p->proof_file), PATHINFO_EXTENSION) ?? ''); @endphp
+							@if(in_array($ext, ['jpg','jpeg','png']))
+								<a href="{{ asset('storage/'.$p->proof_file) }}" target="_blank">
+									<img src="{{ asset('storage/'.$p->proof_file) }}" alt="Bukti" class="h-20 object-contain border rounded" />
+								</a>
+							@else
+								<a href="{{ asset('storage/'.$p->proof_file) }}" target="_blank" class="text-blue-700 underline">Lihat</a>
+							@endif
 						@else
 							<span class="text-gray-500">-</span>
 						@endif

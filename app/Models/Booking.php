@@ -17,6 +17,7 @@ class Booking extends Model
         'event_name',
         'event_type',
         'capacity',
+        'phone',
         'date',
         'end_date',
         'start_time',
@@ -51,6 +52,11 @@ class Booking extends Model
     public function bookingFasilitas()
     {
         return $this->hasMany(BookingFasilitas::class);
+    }
+
+    public function payment()
+    {
+        return $this->hasOne(\App\Models\Payment::class, 'booking_id');
     }
 }
 

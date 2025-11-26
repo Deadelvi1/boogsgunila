@@ -3,7 +3,7 @@
 @section('content')
 <div class="flex items-center justify-between mb-4">
 	<h1 class="text-2xl font-extrabold text-gray-800">Data Jadwal</h1>
-	<a href="{{ route('booking.create') }}" class="bg-green-600 hover:bg-green-700 text-white text-sm px-4 py-2 rounded">+ Tambah Jadwal</a>
+	<a href="{{ route('admin.booking.create') }}" class="bg-green-600 hover:bg-green-700 text-white text-sm px-4 py-2 rounded">+ Tambah Jadwal</a>
 </div>
 
 @if(session('success'))
@@ -30,6 +30,9 @@
 					<div class="font-semibold text-blue-900">{{ $item->event_name }}</div>
 					<div class="text-xs text-gray-600">Gedung: {{ $item->gedung->nama ?? '-' }}</div>
 					<div class="text-xs text-gray-500 mt-1">Pemesan: {{ $item->user->name ?? '-' }}</div>
+					<div class="text-xs text-gray-500 mt-1">Kontak: {{ $item->phone ?? ($item->user->phone ?? '-') }}</div>
+					<div class="text-xs text-gray-500 mt-1">Proposal: @if($item->proposal_file) <a href="{{ asset('storage/'.$item->proposal_file) }}" target="_blank" class="text-blue-700 underline">Lihat</a> @else - @endif</div>
+					<div class="text-xs text-gray-500 mt-1">Bukti Pembayaran: @php $pay = \App\Models\Payment::where('booking_id', $item->id)->first(); @endphp @if($pay && $pay->proof_file) <a href="{{ asset('storage/'.$pay->proof_file) }}" target="_blank" class="text-blue-700 underline">Lihat</a> @else - @endif</div>
 					@if($item->bookingFasilitas && $item->bookingFasilitas->count() > 0)
 					<div class="text-xs text-gray-500 mt-1">
 						Fasilitas: {{ $item->bookingFasilitas->map(function($bf) { return $bf->fasilitas->nama . ' (' . $bf->jumlah . 'x)'; })->implode(', ') }}
@@ -45,8 +48,8 @@
 				</td>
 				<td class="p-3">
 					<div class="flex flex-wrap gap-2">
-						<a href="{{ route('booking.edit', $item->id) }}" class="px-3 py-1 bg-yellow-500 hover:bg-yellow-600 text-white rounded text-xs">Edit</a>
-						<a href="{{ route('booking.invoice', $item->id) }}" class="px-3 py-1 bg-blue-500 hover:bg-blue-600 text-white rounded text-xs">Detail</a>
+						<a href="{{ route('admin.booking.edit', $item->id) }}" class="px-3 py-1 bg-yellow-500 hover:bg-yellow-600 text-white rounded text-xs">Edit</a>
+						<a href="{{ route('admin.booking.invoice', $item->id) }}" class="px-3 py-1 bg-blue-500 hover:bg-blue-600 text-white rounded text-xs">Detail</a>
 						@if($item->status === '1')
 						<form action="{{ route('admin.booking.approve', $item->id) }}" method="POST" class="inline">
 							@csrf @method('PUT')
