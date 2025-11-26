@@ -47,16 +47,23 @@
 					</td>
 					<td class="p-3">
 						<div class="flex flex-wrap gap-2">
-							<form method="POST" action="{{ route('admin.payments.status', $p->id) }}">
-								@csrf @method('PUT')
-								<input type="hidden" name="status" value="2">
-								<button class="px-3 py-1 bg-green-600 text-white rounded">Tandai Selesai</button>
-							</form>
-							<form method="POST" action="{{ route('admin.payments.status', $p->id) }}">
-								@csrf @method('PUT')
-								<input type="hidden" name="status" value="3">
-								<button class="px-3 py-1 bg-red-600 text-white rounded">Batalkan</button>
-							</form>
+							@if($p->status === '1' || $p->status === '0')
+								<form method="POST" action="{{ route('admin.payments.status', $p->id) }}">
+									@csrf @method('PUT')
+									<input type="hidden" name="status" value="2">
+									<button class="px-3 py-1 bg-green-600 hover:bg-green-700 text-white rounded text-xs">Verifikasi</button>
+								</form>
+							@endif
+							@if($p->status !== '3')
+								<form method="POST" action="{{ route('admin.payments.status', $p->id) }}" onsubmit="return confirm('Batalkan pembayaran ini?')">
+									@csrf @method('PUT')
+									<input type="hidden" name="status" value="3">
+									<button class="px-3 py-1 bg-red-600 hover:bg-red-700 text-white rounded text-xs">Batalkan</button>
+								</form>
+							@endif
+							@if($p->status === '2')
+								<span class="px-3 py-1 bg-green-100 text-green-700 rounded text-xs">Terverifikasi</span>
+							@endif
 						</div>
 					</td>
 				</tr>

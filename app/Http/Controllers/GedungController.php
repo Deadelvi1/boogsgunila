@@ -35,7 +35,7 @@ class GedungController extends Controller
         ]);
 
         Gedung::create($request->only(['nama','lokasi','kapasitas','deskripsi']));
-        return redirect()->to('/gedung')->with('success', 'Gedung berhasil ditambahkan.');
+        return redirect()->route('gedung.index')->with('success', 'Gedung berhasil ditambahkan.');
     }
 
     public function edit($id)
@@ -55,14 +55,14 @@ class GedungController extends Controller
 
         $item = Gedung::findOrFail($id);
         $item->update($request->only(['nama','lokasi','kapasitas','deskripsi']));
-        return redirect()->to('/gedung')->with('success', 'Gedung berhasil diperbarui.');
+        return redirect()->route('gedung.index')->with('success', 'Gedung berhasil diperbarui.');
     }
 
     public function destroy($id)
     {
         $item = Gedung::findOrFail($id);
         $item->delete();
-        return redirect()->to('/gedung')->with('success', 'Gedung berhasil dihapus.');
+        return redirect()->route('gedung.index')->with('success', 'Gedung berhasil dihapus.');
     }
 }
 

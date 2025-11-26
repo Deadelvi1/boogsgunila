@@ -44,12 +44,18 @@
 							<input type="text" placeholder="Cari..." class="w-full pl-10 pr-3 py-2 border rounded-lg focus:ring-1 focus:ring-blue-500">
 						</div>
 					</div>
+					@php
+						$avatarUrl = auth()->user()->profile_photo_url ?? asset('img/default-avatar.png');
+					@endphp
 					<div class="flex items-center gap-3">
 						<div class="text-right">
 							<div class="text-sm font-semibold text-gray-800">{{ auth()->user()->name ?? 'Admin' }}</div>
 							<div class="text-xs text-gray-500">Administrator</div>
 						</div>
-						<img src="{{ asset('img/default-avatar.png') }}" class="w-9 h-9 rounded-full border object-cover" alt="avatar">
+						<img src="{{ $avatarUrl }}"
+							 class="w-9 h-9 rounded-full border object-cover"
+							 alt="avatar"
+							 onerror="this.src='{{ asset('img/default-avatar.png') }}'">
 					</div>
 				</div>
 			</header>

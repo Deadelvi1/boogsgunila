@@ -11,7 +11,7 @@ class Payment extends Model
     use HasFactory;
 
     protected $table = 'payments';
-    protected $fillable = ['booking_id','amount','method','proof_file','status'];
+    protected $fillable = ['booking_id','amount','method','selected_method','payment_account_number','proof_file','status'];
     public $incrementing = false;
     protected $keyType = 'string';
 

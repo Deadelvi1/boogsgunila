@@ -11,6 +11,10 @@
         @if(session('success'))
             <div class="bg-green-100 text-green-700 px-4 py-3 rounded mb-4">{{ session('success') }}</div>
         @endif
+        
+        @if(session('warning'))
+            <div class="bg-yellow-100 text-yellow-700 px-4 py-3 rounded mb-4">{{ session('warning') }}</div>
+        @endif
 
         <div class="bg-white shadow rounded overflow-hidden">
             <table class="w-full">
@@ -41,23 +45,24 @@
                             </span>
                         </td>
                         <td class="p-3">
-                            <div class="flex gap-2">
-                                <a href="{{ route('booking.edit', $item->id) }}" class="px-3 py-1 bg-yellow-500 text-white rounded">Edit</a>
-                                <form action="{{ route('booking.destroy', $item->id) }}" method="POST" onsubmit="return confirm('Hapus booking ini?')">
+                            <div class="flex flex-wrap gap-2">
+                                <a href="{{ route('booking.invoice', $item->id) }}" class="px-3 py-1 bg-blue-600 text-white rounded text-xs">Invoice</a>
+                                <a href="{{ route('booking.edit', $item->id) }}" class="px-3 py-1 bg-yellow-500 text-white rounded text-xs">Edit</a>
+                                <form action="{{ route('booking.destroy', $item->id) }}" method="POST" onsubmit="return confirm('Hapus booking ini?')" class="inline">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit" class="px-3 py-1 bg-red-600 text-white rounded">Hapus</button>
+                                    <button type="submit" class="px-3 py-1 bg-red-600 text-white rounded text-xs">Hapus</button>
                                 </form>
                                 @if(auth()->check() && auth()->user()->role === 'A')
-                                <form action="{{ route('admin.booking.approve', $item->id) }}" method="POST">
+                                <form action="{{ route('admin.booking.approve', $item->id) }}" method="POST" class="inline">
                                     @csrf
                                     @method('PUT')
-                                    <button type="submit" class="px-3 py-1 bg-green-600 text-white rounded">Approve</button>
+                                    <button type="submit" class="px-3 py-1 bg-green-600 text-white rounded text-xs">Approve</button>
                                 </form>
-                                <form action="{{ route('admin.booking.reject', $item->id) }}" method="POST">
+                                <form action="{{ route('admin.booking.reject', $item->id) }}" method="POST" class="inline">
                                     @csrf
                                     @method('PUT')
-                                    <button type="submit" class="px-3 py-1 bg-gray-600 text-white rounded">Reject</button>
+                                    <button type="submit" class="px-3 py-1 bg-gray-600 text-white rounded text-xs">Reject</button>
                                 </form>
                                 @endif
                             </div>

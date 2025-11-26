@@ -15,9 +15,6 @@
             <!-- Right Side - Call to Action -->
             <div class="flex flex-col justify-center items-center md:items-end">
                 <h3 class="text-xl font-bold text-blue-900 mb-4 text-center md:text-right">Ayo adakan acara di GSG Unila</h3>
-                <a href="{{ route('auth.register.form') }}" class="bg-blue-500 text-white px-6 py-3 rounded-lg text-sm font-medium transition duration-300 hover:bg-blue-600">
-                    Daftar Sekarang
-                </a>
             </div>
         </div>
     </div>

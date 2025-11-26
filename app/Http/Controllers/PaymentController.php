@@ -11,12 +11,12 @@ class PaymentController extends Controller
 {
 	public function __construct()
 	{
-		$this->middleware(['auth']);
+		$this->middleware('auth');
+		$this->middleware('role:A')->only(['adminIndex', 'adminMark']);
 	}
 
 	public function adminIndex()
 	{
-		$this->middleware(['auth', 'role:A']);
 		$payments = Payment::with(['booking' => function ($q) { $q->with('user','gedung'); }])->latest()->get();
 		return view('admin.payments', [
 			'title' => 'Verifikasi Pembayaran',
@@ -51,7 +51,9 @@ class PaymentController extends Controller
 	public function uploadProof(Request $request, $paymentId)
 	{
 		$request->validate([
-			'proof' => 'required|file|mimes:jpg,jpeg,png,pdf|max:4096',
+			'proof' => 'required_if:selected_method,transfer-bank,e-wallet|file|mimes:jpg,jpeg,png,pdf|max:4096',
+			'selected_method' => 'required|in:bayar-ditempat,transfer-bank,e-wallet',
+			'payment_account_id' => 'required_if:selected_method,transfer-bank,e-wallet|nullable|exists:payment_accounts,id',
 		]);
 
 		$payment = Payment::with('booking')->where('id', $paymentId)
@@ -59,25 +61,55 @@ class PaymentController extends Controller
 				$q->where('user_id', Auth::id());
 			})->firstOrFail();
 
-		$path = $request->file('proof')->store('payment_proofs', 'public');
-		$payment->update([
-			'proof_file' => $path,
-			'method' => 'manual-transfer',
-			'status' => '1', // processing
-		]);
+		$path = null;
+		if ($request->hasFile('proof')) {
+			$path = $request->file('proof')->store('payment_proofs', 'public');
+		}
+		
+		$paymentAccountNumber = null;
+		if ($request->filled('payment_account_id')) {
+			$paymentAccount = \App\Models\PaymentAccount::find($request->payment_account_id);
+			$paymentAccountNumber = $paymentAccount ? $paymentAccount->account_number : null;
+		}
 
-		return back()->with('success', 'Bukti pembayaran berhasil diunggah. Menunggu verifikasi.');
+		$updateData = [
+			'method' => 'manual-transfer',
+			'selected_method' => $request->selected_method,
+			'payment_account_number' => $paymentAccountNumber,
+		];
+
+		// Untuk bayar ditempat, tidak perlu upload bukti, langsung status 1 (menunggu verifikasi admin)
+		// Untuk transfer/e-wallet, perlu upload bukti
+		if ($request->selected_method === 'bayar-ditempat') {
+			$updateData['status'] = '1'; // processing - menunggu admin verifikasi di tempat
+		} else {
+			if ($path) {
+				$updateData['proof_file'] = $path;
+			}
+			$updateData['status'] = '1'; // processing
+		}
+
+		$payment->update($updateData);
+
+		return back()->with('success', 'Bukti pembayaran berhasil diunggah. Menunggu verifikasi admin.');
 	}
 
 	// Admin only quick status updates
 	public function adminMark(Request $request, $paymentId)
 	{
-		$this->middleware(['auth', 'role:A']);
 		$request->validate([
 			'status' => 'required|in:1,2,3',
 		]);
-		$payment = Payment::findOrFail($paymentId);
-		$payment->update(['status' => $request->input('status')]);
+		$payment = Payment::with('booking')->findOrFail($paymentId);
+		$newStatus = $request->input('status');
+		
+		$payment->update(['status' => $newStatus]);
+		
+		// If payment is verified (status = 2), automatically approve the booking
+		if ($newStatus === '2' && $payment->booking) {
+			$payment->booking->update(['status' => '2']); // 2 = approved
+		}
+		
 		return back()->with('success', 'Status pembayaran diperbarui.');
 	}
 }

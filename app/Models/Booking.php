@@ -18,6 +18,7 @@ class Booking extends Model
         'event_type',
         'capacity',
         'date',
+        'end_date',
         'start_time',
         'end_time',
         'proposal_file',

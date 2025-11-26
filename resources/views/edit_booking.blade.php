@@ -10,17 +10,60 @@
                 @method('PUT')
                 <div class="grid grid-cols-1 gap-4">
                     <div>
-                        <label class="block text-sm font-medium">Pilih Gedung</label>
-                        <select name="gedung_id" class="mt-1 w-full border rounded px-3 py-2" required>
+                        <label class="block text-sm font-medium mb-2">
+                            <span class="text-red-600">*</span> Pilih Gedung
+                        </label>
+                        <select name="gedung_id" id="gedung_id" class="mt-1 w-full border rounded px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required>
                             <option value="">- Pilih Gedung -</option>
                             @foreach($gedung as $g)
-                                <option value="{{ $g->id }}" {{ (old('gedung_id', $item->gedung_id) == $g->id) ? 'selected' : '' }}>
-                                    {{ $g->nama }} (Kapasitas: {{ $g->kapasitas }} orang)
+                                <option value="{{ $g->id }}" {{ (old('gedung_id', $item->gedung_id) == $g->id) ? 'selected' : '' }} data-kapasitas="{{ $g->kapasitas }}" data-lokasi="{{ $g->lokasi ?? '-' }}">
+                                    {{ $g->nama }} - Kapasitas: {{ $g->kapasitas }} orang @if($g->lokasi) ({{ $g->lokasi }}) @endif
                                 </option>
                             @endforeach
                         </select>
-                        @error('gedung_id')<p class="text-red-600 text-sm mt-1">{{ $message }}</p>@enderror
+                        <div id="gedung-info" class="mt-2 p-2 bg-blue-50 rounded text-sm text-gray-700 hidden">
+                            <p><strong>Lokasi:</strong> <span id="gedung-lokasi">-</span></p>
+                            <p><strong>Kapasitas Maksimal:</strong> <span id="gedung-kapasitas">-</span> orang</p>
+                        </div>
+                        @error('gedung_id')
+                            <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
+                        @enderror
                     </div>
+                    
+                    <script>
+                        document.addEventListener('DOMContentLoaded', function() {
+                            const gedungSelect = document.getElementById('gedung_id');
+                            const gedungInfo = document.getElementById('gedung-info');
+                            const gedungLokasi = document.getElementById('gedung-lokasi');
+                            const gedungKapasitas = document.getElementById('gedung-kapasitas');
+                            const capacityInput = document.querySelector('input[name="capacity"]');
+                            
+                            if (gedungSelect) {
+                                gedungSelect.addEventListener('change', function() {
+                                    const selectedOption = this.options[this.selectedIndex];
+                                    
+                                    if (this.value && selectedOption.dataset.kapasitas) {
+                                        gedungLokasi.textContent = selectedOption.dataset.lokasi || '-';
+                                        gedungKapasitas.textContent = selectedOption.dataset.kapasitas || '-';
+                                        gedungInfo.classList.remove('hidden');
+                                        
+                                        if (capacityInput) {
+                                            capacityInput.setAttribute('max', selectedOption.dataset.kapasitas);
+                                        }
+                                    } else {
+                                        gedungInfo.classList.add('hidden');
+                                        if (capacityInput) {
+                                            capacityInput.removeAttribute('max');
+                                        }
+                                    }
+                                });
+                                
+                                if (gedungSelect.value) {
+                                    gedungSelect.dispatchEvent(new Event('change'));
+                                }
+                            }
+                        });
+                    </script>
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>

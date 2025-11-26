@@ -22,88 +22,116 @@ use App\Http\Controllers\AdminController;
 |
 */
 
-// Public routes
+// Public routes (accessible without authentication)
 Route::get('/home', [PublicController::class, 'home'])->name('home');
 Route::get('/availability', [PublicController::class, 'availability'])->name('public.availability');
 Route::get('/quote', [PublicController::class, 'quote'])->name('public.quote');
+Route::view('/tentang', 'tentang')->name('tentang');
+Route::get('/jadwal', [PublicController::class, 'jadwal'])->name('public.jadwal');
+
 // Public sewa pages
 Route::view('/sewa/gedung', 'sewa.gedung')->name('public.sewa.gedung');
 Route::view('/sewa/fasilitas', 'sewa.fasilitas')->name('public.sewa.fasilitas');
-Route::get('/jadwal', [PublicController::class, 'jadwal'])->name('public.jadwal');
 
-// Guest only routes
+// Guest only routes (only accessible when not logged in)
 Route::middleware('guest')->group(function () {
     Route::get('/', [PublicController::class, 'home']);
     
-    // Auth routes
+    // Authentication routes
     Route::get('/register', [AuthController::class, 'showRegister'])->name('auth.register.form');
     Route::post('/register', [AuthController::class, 'register'])->name('auth.register');
     Route::get('/login', [AuthController::class, 'showLogin'])->name('auth.login.form');
     Route::post('/login', [AuthController::class, 'login'])->name('auth.login');
 });
 
-// Authenticated routes
+// Authenticated routes (require login)
 Route::middleware(['auth'])->group(function () {
     // Dashboard
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
     
-    // Profile
+    // Profile management
     Route::get('/profile', [ProfileController::class, 'index'])->name('profile');
     Route::put('/profile/update', [ProfileController::class, 'update'])->name('profile.update');
     
-    // Booking routes
-    Route::get('/booking', [BookingController::class, 'index'])->name('booking.index');
-    Route::get('/booking/create', [BookingController::class, 'create'])->name('booking.create');
-    Route::post('/booking', [BookingController::class, 'store'])->name('booking.store');
-    Route::get('/booking/{id}/edit', [BookingController::class, 'edit'])->name('booking.edit');
-    Route::put('/booking/{id}', [BookingController::class, 'update'])->name('booking.update');
-    Route::delete('/booking/{id}', [BookingController::class, 'destroy'])->name('booking.destroy');
-    Route::get('/booking/{id}/invoice', [BookingController::class, 'invoice'])->name('booking.invoice');
+    // Booking management
+    Route::prefix('booking')->name('booking.')->group(function () {
+        Route::get('/', [BookingController::class, 'index'])->name('index');
+        Route::get('/create', [BookingController::class, 'create'])->name('create');
+        Route::post('/', [BookingController::class, 'store'])->name('store');
+        Route::get('/{id}/edit', [BookingController::class, 'edit'])->name('edit');
+        Route::put('/{id}', [BookingController::class, 'update'])->name('update');
+        Route::delete('/{id}', [BookingController::class, 'destroy'])->name('destroy');
+        Route::get('/{id}/invoice', [BookingController::class, 'invoice'])->name('invoice');
+    });
     
-    // Payments
-    Route::get('/payments', [PaymentController::class, 'index'])->name('payments.index');
-    Route::post('/payments/{id}/upload', [PaymentController::class, 'uploadProof'])->name('payments.upload');
+    // Payment management
+    Route::prefix('payments')->name('payments.')->group(function () {
+        Route::get('/', [PaymentController::class, 'index'])->name('index');
+        Route::post('/{id}/upload', [PaymentController::class, 'uploadProof'])->name('upload');
+    });
     
     // Logout
     Route::post('/logout', [AuthController::class, 'logout'])->name('auth.logout');
 });
 
-// Admin routes (admin only)
-Route::middleware(['auth', 'role:A'])->group(function () {
+// Admin routes (admin only - require role 'A')
+Route::middleware(['auth', 'role:A'])->prefix('admin')->name('admin.')->group(function () {
     // Admin Dashboard
-    Route::get('/admin', [AdminController::class, 'index'])->name('admin.dashboard');
-    Route::get('/admin/users', [AdminController::class, 'usersIndex'])->name('admin.users.index');
-    Route::get('/admin/schedules', [AdminController::class, 'schedulesIndex'])->name('admin.schedules.index');
-    Route::get('/admin/rentals', [AdminController::class, 'rentalsIndex'])->name('admin.rentals.index');
+    Route::get('/', [AdminController::class, 'index'])->name('dashboard');
     
+    // Admin Users CRUD
+    Route::prefix('users')->name('users.')->group(function () {
+        Route::get('/', [AdminController::class, 'usersIndex'])->name('index');
+        Route::get('/create', [AdminController::class, 'usersCreate'])->name('create');
+        Route::post('/', [AdminController::class, 'usersStore'])->name('store');
+        Route::get('/{id}/edit', [AdminController::class, 'usersEdit'])->name('edit');
+        Route::put('/{id}', [AdminController::class, 'usersUpdate'])->name('update');
+        Route::delete('/{id}', [AdminController::class, 'usersDestroy'])->name('destroy');
+    });
+    
+    // Admin Schedules & Rentals
+    Route::get('/schedules', [AdminController::class, 'schedulesIndex'])->name('schedules.index');
+    Route::get('/rentals', [AdminController::class, 'rentalsIndex'])->name('rentals.index');
+    
+    // Admin Booking Actions
+    Route::prefix('booking')->name('booking.')->group(function () {
+        Route::put('/{id}/approve', function ($id) {
+            \App\Models\Booking::where('id', $id)->update(['status' => '2']);
+            return redirect()->back()->with('success', 'Booking disetujui.');
+        })->name('approve');
+        
+        Route::put('/{id}/reject', function ($id) {
+            \App\Models\Booking::where('id', $id)->update(['status' => '3']);
+            return redirect()->back()->with('success', 'Booking ditolak.');
+        })->name('reject');
+    });
+    
+    // Payment Verification
+    Route::prefix('payments')->name('payments.')->group(function () {
+        Route::get('/', [PaymentController::class, 'adminIndex'])->name('index');
+        Route::put('/{id}/status', [PaymentController::class, 'adminMark'])->name('status');
+    });
+});
+
+// Admin-only resource routes (Gedung & Fasilitas management)
+Route::middleware(['auth', 'role:A'])->group(function () {
     // Gedung management
-    Route::get('/gedung', [GedungController::class, 'index'])->name('gedung.index');
-    Route::get('/gedung/create', [GedungController::class, 'create'])->name('gedung.create');
-    Route::post('/gedung', [GedungController::class, 'store'])->name('gedung.store');
-    Route::get('/gedung/{id}/edit', [GedungController::class, 'edit'])->name('gedung.edit');
-    Route::put('/gedung/{id}', [GedungController::class, 'update'])->name('gedung.update');
-    Route::delete('/gedung/{id}', [GedungController::class, 'destroy'])->name('gedung.destroy');
+    Route::prefix('gedung')->name('gedung.')->group(function () {
+        Route::get('/', [GedungController::class, 'index'])->name('index');
+        Route::get('/create', [GedungController::class, 'create'])->name('create');
+        Route::post('/', [GedungController::class, 'store'])->name('store');
+        Route::get('/{id}/edit', [GedungController::class, 'edit'])->name('edit');
+        Route::put('/{id}', [GedungController::class, 'update'])->name('update');
+        Route::delete('/{id}', [GedungController::class, 'destroy'])->name('destroy');
+    });
     
     // Fasilitas management
-    Route::get('/fasilitas', [FasilitasController::class, 'index'])->name('fasilitas.index');
-    Route::get('/fasilitas/create', [FasilitasController::class, 'create'])->name('fasilitas.create');
-    Route::post('/fasilitas', [FasilitasController::class, 'store'])->name('fasilitas.store');
-    Route::get('/fasilitas/{id}/edit', [FasilitasController::class, 'edit'])->name('fasilitas.edit');
-    Route::put('/fasilitas/{id}', [FasilitasController::class, 'update'])->name('fasilitas.update');
-    Route::delete('/fasilitas/{id}', [FasilitasController::class, 'destroy'])->name('fasilitas.destroy');
-    
-    // Admin booking actions
-    Route::put('/admin/booking/{id}/approve', function ($id) {
-        \App\Models\Booking::where('id', $id)->update(['status' => '2']);
-        return redirect()->back()->with('success', 'Booking disetujui.');
-    })->name('admin.booking.approve');
-    
-    Route::put('/admin/booking/{id}/reject', function ($id) {
-        \App\Models\Booking::where('id', $id)->update(['status' => '3']);
-        return redirect()->back()->with('success', 'Booking ditolak.');
-    })->name('admin.booking.reject');
-    
-    // Payment verification
-    Route::get('/admin/payments', [PaymentController::class, 'adminIndex'])->name('admin.payments.index');
-    Route::put('/admin/payments/{id}/status', [\App\Http\Controllers\PaymentController::class, 'adminMark'])->name('admin.payments.status');
+    Route::prefix('fasilitas')->name('fasilitas.')->group(function () {
+        Route::get('/', [FasilitasController::class, 'index'])->name('index');
+        Route::get('/create', [FasilitasController::class, 'create'])->name('create');
+        Route::post('/', [FasilitasController::class, 'store'])->name('store');
+        Route::get('/{id}/edit', [FasilitasController::class, 'edit'])->name('edit');
+        Route::put('/{id}', [FasilitasController::class, 'update'])->name('update');
+        Route::delete('/{id}', [FasilitasController::class, 'destroy'])->name('destroy');
+    });
 });

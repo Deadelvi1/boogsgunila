@@ -87,6 +87,7 @@
 				<h3 class="text-lg font-semibold text-gray-800">Mulai Sewa</h3>
 				<p class="mt-1 text-3xl font-extrabold text-blue-600">100K <span class="text-gray-500 text-base font-medium">per Hari</span></p>
 				<a href="{{ url('/booking/create') }}" class="mt-4 inline-block w-full text-center bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-3 rounded-lg transition">Sewa Sekarang</a>
+				<a href="{{ route('public.jadwal') }}" class="mt-2 inline-block w-full text-center bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 rounded-lg transition">Lihat Jadwal Booking</a>
 
 				<div class="mt-6 border-t pt-4">
 					<p class="text-sm font-medium text-gray-700 mb-2">Termasuk</p>

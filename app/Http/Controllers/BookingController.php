@@ -18,19 +18,32 @@ class BookingController extends Controller
     private const BASE_RATE_PER_HOUR = 500000; 
     public function index()
     {
+        $query = Booking::with(['user', 'gedung']);
+        
+        // If user is not admin, only show their own bookings
+        if (auth()->user()->role !== 'A') {
+            $query->where('user_id', auth()->id());
+        }
+        
         $data = [
             'title' => 'List Booking',
-            'items' => Booking::with(['user', 'gedung'])->latest()->get(),
+            'items' => $query->latest()->get(),
         ];
         return view('list_booking', $data);
     }
 
     public function create()
     {
-        $gedung = Gedung::all();
-        $fasilitas = Fasilitas::all();
+        $gedung = Gedung::orderBy('nama')->get();
+        $fasilitas = Fasilitas::orderBy('nama')->get();
+        
+        if ($gedung->count() === 0) {
+            return redirect()->route('booking.index')
+                ->with('warning', 'Belum ada gedung tersedia. Silakan hubungi admin untuk menambahkan gedung terlebih dahulu.');
+        }
+        
         return view('create_booking', [
-            'title' => 'Create Booking',
+            'title' => 'Buat Booking Gedung',
             'gedung' => $gedung,
             'fasilitas' => $fasilitas,
         ]);
@@ -44,6 +57,7 @@ class BookingController extends Controller
             'event_type' => 'required|string|max:100',
             'capacity' => 'required|integer|min:1',
             'date' => 'required|date',
+            'end_date' => 'nullable|date|after_or_equal:date',
             'start_time' => 'required|date_format:H:i',
             'end_time' => 'required|date_format:H:i|after:start_time',
             'proposal_file' => 'nullable|file|mimes:pdf,doc,docx',
@@ -52,17 +66,34 @@ class BookingController extends Controller
             'fasilitas.*.jumlah' => 'required|integer|min:1',
         ]);
 
-        // Cek bentrok jadwal pada gedung dan tanggal yang sama (status 1/2 dianggap memblokir)
+        // Cek bentrok jadwal pada gedung
+        // Hanya booking dengan status 2 (disetujui) yang memblokir jadwal
+        $startDate = $request->input('date');
+        $endDate = $request->input('end_date') ?? $startDate;
+        
         $overlap = Booking::where('gedung_id', $request->input('gedung_id'))
-            ->where('date', $request->input('date'))
-            ->whereIn('status', ['1','2'])
-            ->where(function($q) use ($request) {
-                $q->where('start_time', '<', $request->input('end_time'))
-                  ->where('end_time', '>', $request->input('start_time'));
+            ->where('status', '2') // Hanya yang sudah disetujui (pembayaran terverifikasi)
+            ->where(function($q) use ($startDate, $endDate, $request) {
+                $q->where(function($query) use ($startDate, $endDate) {
+                    // Check if booking date range overlaps
+                    $query->whereBetween('date', [$startDate, $endDate])
+                          ->orWhereBetween('end_date', [$startDate, $endDate])
+                          ->orWhere(function($q2) use ($startDate, $endDate) {
+                              $q2->where('date', '<=', $startDate)
+                                 ->where(function($q3) use ($endDate) {
+                                     $q3->whereNull('end_date')
+                                        ->orWhere('end_date', '>=', $endDate);
+                                 });
+                          });
+                })
+                ->where(function($timeQuery) use ($request) {
+                    $timeQuery->where('start_time', '<', $request->input('end_time'))
+                              ->where('end_time', '>', $request->input('start_time'));
+                });
             })
             ->exists();
         if ($overlap) {
-            return back()->withErrors(['date' => 'Jadwal bentrok pada tanggal/jam tersebut.'])->withInput();
+            return back()->withErrors(['date' => 'Jadwal bentrok pada tanggal/jam tersebut. Gedung sudah dipesan untuk waktu tersebut.'])->withInput();
         }
 
         $filePath = null;
@@ -77,6 +108,7 @@ class BookingController extends Controller
             'event_type' => $request->input('event_type'),
             'capacity' => $request->input('capacity'),
             'date' => $request->input('date'),
+            'end_date' => $request->input('end_date'),
             'start_time' => $request->input('start_time'),
             'end_time' => $request->input('end_time'),
             'proposal_file' => $filePath,
@@ -87,10 +119,17 @@ class BookingController extends Controller
         $facilitiesTotal = 0;
         foreach ($fasilitasItems as $item) {
             $fasilitas = Fasilitas::find($item['id']);
+            if (!$fasilitas) {
+                continue;
+            }
+
+            $jumlah = $item['jumlah'] ?? 1;
+            $facilitiesTotal += ($fasilitas->harga ?? 0) * $jumlah;
+
             BookingFasilitas::create([
                 'booking_id' => $booking->id,
                 'fasilitas_id' => $item['id'],
-                'jumlah' => $item['jumlah'] ?? 1,
+                'jumlah' => $jumlah,
             ]);
         }
 
@@ -114,8 +153,14 @@ class BookingController extends Controller
     public function edit($id)
     {
         $booking = Booking::with('bookingFasilitas.fasilitas')->findOrFail($id);
-        $gedung = Gedung::all();
-        $fasilitas = Fasilitas::all();
+        
+        // Check authorization - user can only edit their own bookings unless admin
+        if (auth()->user()->role !== 'A' && $booking->user_id !== auth()->id()) {
+            abort(403, 'Unauthorized action.');
+        }
+        
+        $gedung = Gedung::orderBy('nama')->get();
+        $fasilitas = Fasilitas::orderBy('nama')->get();
         return view('edit_booking', [
             'title' => 'Edit Booking',
             'item' => $booking,
@@ -126,18 +171,50 @@ class BookingController extends Controller
 
     public function invoice($id)
     {
-        $booking = Booking::with('user')->findOrFail($id);
-        $payment = \App\Models\Payment::where('booking_id', $id)->firstOrFail();
+        $booking = Booking::with(['user', 'gedung', 'bookingFasilitas.fasilitas'])->findOrFail($id);
+        
+        // Check authorization - user can only view their own invoice unless admin
+        if (auth()->user()->role !== 'A' && $booking->user_id !== auth()->id()) {
+            abort(403, 'Unauthorized action.');
+        }
+        
+        $payment = \App\Models\Payment::where('booking_id', $id)->first();
+        
+        // If payment doesn't exist, create one
+        if (!$payment) {
+            // Calculate amount
+            $start = strtotime($booking->start_time);
+            $end = strtotime($booking->end_time);
+            $hours = max(1, ceil(($end - $start) / 3600));
+            
+            $facilitiesTotal = 0;
+            foreach ($booking->bookingFasilitas as $bf) {
+                $facilitiesTotal += ($bf->fasilitas->harga ?? 0) * $bf->jumlah;
+            }
+            
+            $amount = ($hours * self::BASE_RATE_PER_HOUR) + $facilitiesTotal;
+            
+            $payment = \App\Models\Payment::create([
+                'booking_id' => $booking->id,
+                'amount' => $amount,
+                'method' => 'pending',
+                'proof_file' => null,
+                'status' => '0',
+            ]);
+        }
+        
+        $paymentAccounts = \App\Models\PaymentAccount::where('is_active', true)->orderBy('type')->orderBy('name')->get();
         return view('booking_invoice', [
             'title' => 'Invoice Booking',
             'booking' => $booking,
             'payment' => $payment,
+            'paymentAccounts' => $paymentAccounts,
         ]);
     }
 
     public function update(Request $request, $id)
     {
-        $request->validate([
+        $validationRules = [
             'gedung_id' => 'required|exists:gedung,id',
             'event_name' => 'required|string|max:255',
             'event_type' => 'required|string|max:100',
@@ -145,30 +222,50 @@ class BookingController extends Controller
             'date' => 'required|date',
             'start_time' => 'required|date_format:H:i',
             'end_time' => 'required|date_format:H:i|after:start_time',
-            'status' => 'required|in:1,2,3,4',
-            'fasilitas' => 'array',
+            'fasilitas' => 'nullable|array',
             'fasilitas.*.id' => 'required_with:fasilitas|exists:fasilitas,id',
             'fasilitas.*.jumlah' => 'required_with:fasilitas|integer|min:1',
-        ]);
+        ];
+        
+        // Only admin can change status
+        if (auth()->user()->role === 'A') {
+            $validationRules['status'] = 'required|in:1,2,3,4';
+        }
+        
+        $request->validate($validationRules);
 
         // Cek bentrok saat update (kecuali dirinya sendiri)
+        // Hanya booking dengan status 2 (disetujui) yang memblokir
         $overlap = Booking::where('gedung_id', $request->input('gedung_id'))
             ->where('date', $request->input('date'))
             ->where('id', '!=', $id)
-            ->whereIn('status', ['1','2'])
+            ->where('status', '2') // Hanya yang sudah disetujui (pembayaran terverifikasi)
             ->where(function($q) use ($request) {
                 $q->where('start_time', '<', $request->input('end_time'))
                   ->where('end_time', '>', $request->input('start_time'));
             })
             ->exists();
         if ($overlap) {
-            return back()->withErrors(['date' => 'Jadwal bentrok pada tanggal/jam tersebut.'])->withInput();
+            return back()->withErrors(['date' => 'Jadwal bentrok pada tanggal/jam tersebut. Gedung sudah dipesan untuk waktu tersebut.'])->withInput();
         }
 
         $booking = Booking::findOrFail($id);
-        $booking->update($request->only([
-            'gedung_id', 'event_name', 'event_type', 'capacity', 'date', 'start_time', 'end_time', 'status'
-        ]));
+        
+        // Check authorization - user can only update their own bookings unless admin
+        if (auth()->user()->role !== 'A' && $booking->user_id !== auth()->id()) {
+            abort(403, 'Unauthorized action.');
+        }
+        
+        // Only admin can change status
+        $updateData = $request->only([
+            'gedung_id', 'event_name', 'event_type', 'capacity', 'date', 'start_time', 'end_time'
+        ]);
+        
+        if (auth()->user()->role === 'A') {
+            $updateData['status'] = $request->input('status');
+        }
+        
+        $booking->update($updateData);
 
         // Update fasilitas
         $booking->bookingFasilitas()->delete(); // Remove old items
@@ -180,14 +277,26 @@ class BookingController extends Controller
             ]);
         }
 
-        return redirect()->to('/booking')->with('success', 'Booking berhasil diperbarui.');
+        return redirect()->route('booking.index')->with('success', 'Booking berhasil diperbarui.');
     }
 
     public function destroy($id)
     {
         $booking = Booking::findOrFail($id);
+        
+        // Check authorization - user can only delete their own bookings unless admin
+        if (auth()->user()->role !== 'A' && $booking->user_id !== auth()->id()) {
+            abort(403, 'Unauthorized action.');
+        }
+        
+        // Prevent deleting approved bookings (status 2) unless admin
+        if ($booking->status === '2' && auth()->user()->role !== 'A') {
+            return redirect()->route('booking.index')
+                ->with('error', 'Tidak dapat menghapus booking yang sudah disetujui. Silakan hubungi admin.');
+        }
+        
         $booking->delete();
-        return redirect()->to('/booking')->with('success', 'Booking berhasil dihapus.');
+        return redirect()->route('booking.index')->with('success', 'Booking berhasil dihapus.');
     }
 }
 

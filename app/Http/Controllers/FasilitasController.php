@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\Facility;
+use App\Models\Fasilitas;
 
 class FasilitasController extends Controller
 {
@@ -11,11 +11,12 @@ class FasilitasController extends Controller
     {
         return view('sewa.fasilitas', ['title' => 'Full Set Dekorasi Wisuda']);
     }
+
     public function index()
     {
         $data = [
             'title' => 'List Fasilitas',
-            'items' => Facility::all(),
+            'items' => Fasilitas::orderBy('nama')->get(),
         ];
         return view('list_fasilitas', $data);
     }
@@ -27,38 +28,42 @@ class FasilitasController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
             'nama' => 'required|string|max:255',
-            'price' => 'required|numeric|min:0',
+            'harga' => 'required|numeric|min:0',
+            'stok' => 'required|integer|min:0',
+            'deskripsi' => 'nullable|string',
         ]);
 
-        Facility::create(['name' => $request->input('nama'), 'price' => $request->input('price')]);
-        return redirect()->to('/fasilitas')->with('success', 'Fasilitas berhasil ditambahkan.');
+        Fasilitas::create($validated);
+        return redirect()->route('fasilitas.index')->with('success', 'Fasilitas berhasil ditambahkan.');
     }
 
     public function edit($id)
     {
-        $item = Facility::findOrFail($id);
+        $item = Fasilitas::findOrFail($id);
         return view('edit_fasilitas', ['title' => 'Edit Fasilitas', 'item' => $item]);
     }
 
     public function update(Request $request, $id)
     {
-        $request->validate([
+        $validated = $request->validate([
             'nama' => 'required|string|max:255',
-            'price' => 'required|numeric|min:0',
+            'harga' => 'required|numeric|min:0',
+            'stok' => 'required|integer|min:0',
+            'deskripsi' => 'nullable|string',
         ]);
 
-        $item = Facility::findOrFail($id);
-        $item->update(['name' => $request->input('nama'), 'price' => $request->input('price')]);
-        return redirect()->to('/fasilitas')->with('success', 'Fasilitas berhasil diperbarui.');
+        $item = Fasilitas::findOrFail($id);
+        $item->update($validated);
+        return redirect()->route('fasilitas.index')->with('success', 'Fasilitas berhasil diperbarui.');
     }
 
     public function destroy($id)
     {
-        $item = Facility::findOrFail($id);
+        $item = Fasilitas::findOrFail($id);
         $item->delete();
-        return redirect()->to('/fasilitas')->with('success', 'Fasilitas berhasil dihapus.');
+        return redirect()->route('fasilitas.index')->with('success', 'Fasilitas berhasil dihapus.');
     }
 }
 

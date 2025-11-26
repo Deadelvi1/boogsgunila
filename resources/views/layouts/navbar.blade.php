@@ -11,23 +11,23 @@
 
             <div class="hidden md:flex items-center space-x-6">
                 @auth
-                    <a href="{{ route('dashboard') }}" class="text-gray-700 hover:text-blue-900 px-3 py-2 text-sm font-medium transition duration-300">Beranda</a>
-                    <a href="{{ route('public.sewa.gedung') }}" class="text-gray-700 hover:text-blue-900 px-3 py-2 text-sm font-medium transition duration-300">Sewa</a>
-                    <a href="{{ route('public.sewa.fasilitas') }}" class="text-gray-700 hover:text-blue-900 px-3 py-2 text-sm font-medium transition duration-300">Fasilitas</a>
-                    <a href="{{ route('public.jadwal') }}" class="text-gray-700 hover:text-blue-900 px-3 py-2 text-sm font-medium transition duration-300">Jadwal</a>
-                    <a href="{{ route('home') }}#tentang" class="text-gray-700 hover:text-blue-900 px-3 py-2 text-sm font-medium transition duration-300">Tentang</a>
-                @else
-                    <a href="{{ route('home') }}" class="text-gray-700 hover:text-blue-900 px-3 py-2 text-sm font-medium transition duration-300">Beranda</a>
-                    <a href="{{ route('public.sewa.gedung') }}" class="text-gray-700 hover:text-blue-900 px-3 py-2 text-sm font-medium transition duration-300">Sewa</a>
-                    <a href="{{ route('public.sewa.fasilitas') }}" class="text-gray-700 hover:text-blue-900 px-3 py-2 text-sm font-medium transition duration-300">Fasilitas</a>
-                    <a href="{{ route('public.jadwal') }}" class="text-gray-700 hover:text-blue-900 px-3 py-2 text-sm font-medium transition duration-300">Jadwal</a>
-                    <a href="{{ route('home') }}#tentang" class="text-gray-700 hover:text-blue-900 px-3 py-2 text-sm font-medium transition duration-300">Tentang</a>
-                @endauth
-                @auth
+                    {{-- Menu untuk Admin --}}
                     @if(auth()->user()->role === 'A')
                         <a href="{{ route('admin.dashboard') }}" 
                            class="text-gray-700 hover:text-blue-900 px-3 py-2 text-sm font-medium transition duration-300">
-                            Admin
+                            Dashboard
+                        </a>
+                        <a href="{{ route('admin.users.index') }}" 
+                           class="text-gray-700 hover:text-blue-900 px-3 py-2 text-sm font-medium transition duration-300">
+                            Pengguna
+                        </a>
+                        <a href="{{ route('admin.schedules.index') }}" 
+                           class="text-gray-700 hover:text-blue-900 px-3 py-2 text-sm font-medium transition duration-300">
+                            Jadwal
+                        </a>
+                        <a href="{{ route('admin.rentals.index') }}" 
+                           class="text-gray-700 hover:text-blue-900 px-3 py-2 text-sm font-medium transition duration-300">
+                            Sewa
                         </a>
                         <a href="{{ route('gedung.index') }}" 
                            class="text-gray-700 hover:text-blue-900 px-3 py-2 text-sm font-medium transition duration-300">
@@ -37,15 +37,31 @@
                            class="text-gray-700 hover:text-blue-900 px-3 py-2 text-sm font-medium transition duration-300">
                             Fasilitas
                         </a>
+                        <a href="{{ route('admin.payments.index') }}" 
+                           class="text-gray-700 hover:text-blue-900 px-3 py-2 text-sm font-medium transition duration-300">
+                            Pembayaran
+                        </a>
+                    {{-- Menu untuk User Biasa --}}
+                    @else
+                        <a href="{{ route('dashboard') }}" class="text-gray-700 hover:text-blue-900 px-3 py-2 text-sm font-medium transition duration-300">Beranda</a>
+                        <a href="{{ route('public.sewa.gedung') }}" class="text-gray-700 hover:text-blue-900 px-3 py-2 text-sm font-medium transition duration-300">Sewa Gedung & Fasilitas</a>
+                        <a href="{{ route('public.jadwal') }}" class="text-gray-700 hover:text-blue-900 px-3 py-2 text-sm font-medium transition duration-300">Jadwal</a>
+                        <a href="{{ route('booking.index') }}" 
+                           class="text-gray-700 hover:text-blue-900 px-3 py-2 text-sm font-medium transition duration-300">
+                            Booking
+                        </a>
+                        <a href="{{ route('payments.index') }}" 
+                           class="text-gray-700 hover:text-blue-900 px-3 py-2 text-sm font-medium transition duration-300">
+                            Pembayaran
+                        </a>
+                        <a href="{{ route('tentang') }}" class="text-gray-700 hover:text-blue-900 px-3 py-2 text-sm font-medium transition duration-300">Tentang</a>
                     @endif
-                    <a href="{{ route('booking.index') }}" 
-                       class="text-gray-700 hover:text-blue-900 px-3 py-2 text-sm font-medium transition duration-300">
-                        Booking
-                    </a>
-                    <a href="{{ route('payments.index') }}" 
-                       class="text-gray-700 hover:text-blue-900 px-3 py-2 text-sm font-medium transition duration-300">
-                        Pembayaran
-                    </a>
+                @else
+                    {{-- Menu untuk Guest (Belum Login) --}}
+                    <a href="{{ route('home') }}" class="text-gray-700 hover:text-blue-900 px-3 py-2 text-sm font-medium transition duration-300">Beranda</a>
+                    <a href="{{ route('public.sewa.gedung') }}" class="text-gray-700 hover:text-blue-900 px-3 py-2 text-sm font-medium transition duration-300">Sewa Gedung & Fasilitas</a>
+                    <a href="{{ route('public.jadwal') }}" class="text-gray-700 hover:text-blue-900 px-3 py-2 text-sm font-medium transition duration-300">Jadwal</a>
+                    <a href="{{ route('tentang') }}" class="text-gray-700 hover:text-blue-900 px-3 py-2 text-sm font-medium transition duration-300">Tentang</a>
                 @endauth
             </div>
 
@@ -115,20 +131,24 @@
         <div class="md:hidden" x-show="mobileMenu" @click.away="mobileMenu = false">
             <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-gray-50 rounded-lg mt-2 border border-gray-200">
                 @auth
-                    <a href="{{ route('dashboard') }}" class="text-gray-700 hover:text-blue-900 block px-3 py-2 rounded-md text-base font-medium transition duration-300">Beranda</a>
-                    <a href="{{ route('public.sewa.gedung') }}" class="text-gray-700 hover:text-blue-900 block px-3 py-2 rounded-md text-base font-medium transition duration-300">Sewa</a>
-                    <a href="{{ route('public.sewa.fasilitas') }}" class="text-gray-700 hover:text-blue-900 block px-3 py-2 rounded-md text-base font-medium transition duration-300">Fasilitas</a>
-                    <a href="{{ route('public.jadwal') }}" class="text-gray-700 hover:text-blue-900 block px-3 py-2 rounded-md text-base font-medium transition duration-300">Jadwal</a>
-                    <a href="{{ route('home') }}#tentang" class="text-gray-700 hover:text-blue-900 block px-3 py-2 rounded-md text-base font-medium transition duration-300">Tentang</a>
-                @else
-                    <a href="{{ route('home') }}" class="text-gray-700 hover:text-blue-900 block px-3 py-2 rounded-md text-base font-medium transition duration-300">Beranda</a>
-                    <a href="{{ route('public.sewa.gedung') }}" class="text-gray-700 hover:text-blue-900 block px-3 py-2 rounded-md text-base font-medium transition duration-300">Sewa</a>
-                    <a href="{{ route('public.sewa.fasilitas') }}" class="text-gray-700 hover:text-blue-900 block px-3 py-2 rounded-md text-base font-medium transition duration-300">Fasilitas</a>
-                    <a href="{{ route('public.jadwal') }}" class="text-gray-700 hover:text-blue-900 block px-3 py-2 rounded-md text-base font-medium transition duration-300">Jadwal</a>
-                    <a href="{{ route('home') }}#tentang" class="text-gray-700 hover:text-blue-900 block px-3 py-2 rounded-md text-base font-medium transition duration-300">Tentang</a>
-                @endauth
-                @auth
+                    {{-- Menu Mobile untuk Admin --}}
                     @if(auth()->user()->role === 'A')
+                        <a href="{{ route('admin.dashboard') }}" 
+                           class="text-gray-700 hover:text-blue-900 block px-3 py-2 rounded-md text-base font-medium transition duration-300">
+                            Dashboard
+                        </a>
+                        <a href="{{ route('admin.users.index') }}" 
+                           class="text-gray-700 hover:text-blue-900 block px-3 py-2 rounded-md text-base font-medium transition duration-300">
+                            Pengguna
+                        </a>
+                        <a href="{{ route('admin.schedules.index') }}" 
+                           class="text-gray-700 hover:text-blue-900 block px-3 py-2 rounded-md text-base font-medium transition duration-300">
+                            Jadwal
+                        </a>
+                        <a href="{{ route('admin.rentals.index') }}" 
+                           class="text-gray-700 hover:text-blue-900 block px-3 py-2 rounded-md text-base font-medium transition duration-300">
+                            Sewa
+                        </a>
                         <a href="{{ route('gedung.index') }}" 
                            class="text-gray-700 hover:text-blue-900 block px-3 py-2 rounded-md text-base font-medium transition duration-300">
                             Gedung
@@ -137,16 +157,35 @@
                            class="text-gray-700 hover:text-blue-900 block px-3 py-2 rounded-md text-base font-medium transition duration-300">
                             Fasilitas
                         </a>
+                        <a href="{{ route('admin.payments.index') }}" 
+                           class="text-gray-700 hover:text-blue-900 block px-3 py-2 rounded-md text-base font-medium transition duration-300">
+                            Pembayaran
+                        </a>
+                    {{-- Menu Mobile untuk User Biasa --}}
+                    @else
+                        <a href="{{ route('dashboard') }}" class="text-gray-700 hover:text-blue-900 block px-3 py-2 rounded-md text-base font-medium transition duration-300">Beranda</a>
+                        <a href="{{ route('public.sewa.gedung') }}" class="text-gray-700 hover:text-blue-900 block px-3 py-2 rounded-md text-base font-medium transition duration-300">Sewa Gedung & Fasilitas</a>
+                        <a href="{{ route('public.jadwal') }}" class="text-gray-700 hover:text-blue-900 block px-3 py-2 rounded-md text-base font-medium transition duration-300">Jadwal</a>
+                        <a href="{{ route('booking.index') }}" 
+                           class="text-gray-700 hover:text-blue-900 block px-3 py-2 rounded-md text-base font-medium transition duration-300">
+                            Booking
+                        </a>
+                        <a href="{{ route('payments.index') }}" 
+                           class="text-gray-700 hover:text-blue-900 block px-3 py-2 rounded-md text-base font-medium transition duration-300">
+                            Pembayaran
+                        </a>
+                        <a href="{{ route('tentang') }}" class="text-gray-700 hover:text-blue-900 block px-3 py-2 rounded-md text-base font-medium transition duration-300">Tentang</a>
                     @endif
-                    <a href="{{ route('booking.index') }}" 
-                       class="text-gray-700 hover:text-blue-900 block px-3 py-2 rounded-md text-base font-medium transition duration-300">
-                        Booking
-                    </a>
-                    <a href="{{ route('payments.index') }}" 
-                       class="text-gray-700 hover:text-blue-900 block px-3 py-2 rounded-md text-base font-medium transition duration-300">
-                        Pembayaran
-                    </a>
-                    <hr class="border-gray-300">
+                @else
+                    {{-- Menu Mobile untuk Guest --}}
+                    <a href="{{ route('home') }}" class="text-gray-700 hover:text-blue-900 block px-3 py-2 rounded-md text-base font-medium transition duration-300">Beranda</a>
+                    <a href="{{ route('public.sewa.gedung') }}" class="text-gray-700 hover:text-blue-900 block px-3 py-2 rounded-md text-base font-medium transition duration-300">Sewa Gedung & Fasilitas</a>
+                    <a href="{{ route('public.jadwal') }}" class="text-gray-700 hover:text-blue-900 block px-3 py-2 rounded-md text-base font-medium transition duration-300">Jadwal</a>
+                    <a href="{{ route('tentang') }}" class="text-gray-700 hover:text-blue-900 block px-3 py-2 rounded-md text-base font-medium transition duration-300">Tentang</a>
+                @endauth
+                
+                @auth
+                    <hr class="border-gray-300 my-2">
                     <a href="{{ route('profile') }}" 
                        class="text-gray-700 hover:text-blue-900 block px-3 py-2 rounded-md text-base font-medium transition duration-300">
                         Profile

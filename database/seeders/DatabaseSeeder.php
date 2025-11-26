@@ -16,6 +16,7 @@ class DatabaseSeeder extends Seeder
             AdminUserSeeder::class,
             GedungSeeder::class,
             FasilitasSeeder::class,
+            PaymentAccountSeeder::class,
         ]);
     }
 }

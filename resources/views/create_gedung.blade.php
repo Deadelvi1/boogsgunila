@@ -1,36 +1,51 @@
-@extends('layouts.app')
+@extends('admin.layout')
 
 @section('content')
-<div class="min-h-screen bg-gray-50 py-8">
-    <div class="max-w-2xl mx-auto px-4">
-        <h1 class="text-2xl font-bold mb-6">Tambah Gedung</h1>
-        <div class="bg-white shadow rounded p-6">
-            <form action="{{ route('gedung.store') }}" method="POST" class="space-y-4">
-                @csrf
-                <div>
-                    <label class="block text-sm font-medium">Nama</label>
-                    <input type="text" name="nama" value="{{ old('nama') }}" class="mt-1 w-full border rounded px-3 py-2" required>
-                    @error('nama')<p class="text-red-600 text-sm">{{ $message }}</p>@enderror
-                </div>
-                <div>
-                    <label class="block text-sm font-medium">Lokasi</label>
-                    <input type="text" name="lokasi" value="{{ old('lokasi') }}" class="mt-1 w-full border rounded px-3 py-2">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium">Kapasitas</label>
-                    <input type="number" name="kapasitas" value="{{ old('kapasitas') }}" class="mt-1 w-full border rounded px-3 py-2" min="0">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium">Deskripsi</label>
-                    <textarea name="deskripsi" class="mt-1 w-full border rounded px-3 py-2" rows="4">{{ old('deskripsi') }}</textarea>
-                </div>
-                <div class="flex gap-2 pt-2">
-                    <a href="{{ route('gedung.index') }}" class="px-4 py-2 border rounded">Batal</a>
-                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded">Simpan</button>
-                </div>
-            </form>
-        </div>
-    </div>
+<h1 class="text-2xl font-extrabold text-gray-800 mb-4">Tambah Gedung</h1>
+
+@if($errors->any())
+	<div class="bg-red-100 text-red-700 px-4 py-3 rounded mb-4">
+		<ul>
+			@foreach($errors->all() as $error)
+				<li>{{ $error }}</li>
+			@endforeach
+		</ul>
+	</div>
+@endif
+
+<div class="bg-white rounded-xl shadow p-6">
+	<form method="POST" action="{{ route('gedung.store') }}">
+		@csrf
+		<div class="space-y-4">
+			<div>
+				<label class="block text-sm font-medium text-gray-700 mb-1">Nama Gedung <span class="text-red-600">*</span></label>
+				<input type="text" name="nama" value="{{ old('nama') }}" required
+					class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
+			</div>
+			<div>
+				<label class="block text-sm font-medium text-gray-700 mb-1">Lokasi</label>
+				<input type="text" name="lokasi" value="{{ old('lokasi') }}"
+					class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+					placeholder="Contoh: Lantai 1, Gedung A">
+			</div>
+			<div>
+				<label class="block text-sm font-medium text-gray-700 mb-1">Kapasitas</label>
+				<input type="number" name="kapasitas" value="{{ old('kapasitas') }}" min="0"
+					class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+					placeholder="Jumlah orang">
+			</div>
+			<div>
+				<label class="block text-sm font-medium text-gray-700 mb-1">Deskripsi</label>
+				<textarea name="deskripsi" rows="4"
+					class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+					placeholder="Deskripsi gedung...">{{ old('deskripsi') }}</textarea>
+			</div>
+			<div class="flex gap-2 pt-4">
+				<button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">Simpan</button>
+				<a href="{{ route('gedung.index') }}" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded">Batal</a>
+			</div>
+		</div>
+	</form>
 </div>
 @endsection
 
