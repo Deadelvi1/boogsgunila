@@ -6,21 +6,22 @@
 		<h1 class="text-3xl md:text-4xl font-extrabold text-blue-900">Pembayaran</h1>
 		<p class="text-gray-600">Pembayaran Detail Gedung Serba Guna Universitas Lampung</p>
 
-		<!-- Tabs -->
+		<!-- Status menu (horizontal colored pills) -->
 		@php
-			$tabs = [
-				'' => ['label' => 'Belum dibayar', 'icon' => 'clock', 'color' => 'text-gray-500'],
-				'1' => ['label' => 'Proses', 'icon' => 'spinner', 'color' => 'text-yellow-500'],
-				'2' => ['label' => 'Selesai', 'icon' => 'check-circle', 'color' => 'text-green-600'],
-				'3' => ['label' => 'Dibatalkan', 'icon' => 'xmark-circle', 'color' => 'text-red-600'],
+			$menu = [
+				'' => ['label' => 'Belum dibayar', 'bg' => 'bg-gray-100', 'text' => 'text-gray-700', 'active' => 'bg-blue-600 text-white'],
+				'1' => ['label' => 'Proses', 'bg' => 'bg-yellow-50', 'text' => 'text-yellow-700', 'active' => 'bg-yellow-600 text-white'],
+				'2' => ['label' => 'Selesai', 'bg' => 'bg-green-50', 'text' => 'text-green-700', 'active' => 'bg-green-600 text-white'],
+				'3' => ['label' => 'Dibatalkan', 'bg' => 'bg-red-50', 'text' => 'text-red-700', 'active' => 'bg-red-600 text-white'],
 			];
 		@endphp
-		<div class="flex items-center gap-6 mt-6">
-			@foreach($tabs as $key => $tab)
-				@php $isActive = (string)$active === (string)$key; @endphp
+
+		<div class="flex items-center gap-3 mt-6 flex-wrap">
+			@foreach($menu as $key => $m)
+				@php $isActive = ((string)($active ?? '') === (string)$key); @endphp
 				<a href="{{ route('payments.index', ['status' => $key !== '' ? $key : null]) }}"
-				   class="flex items-center gap-2 text-sm {{ $isActive ? 'font-bold text-blue-900' : 'text-gray-600' }}">
-					<span class="{{ $tab['color'] }}">●</span> {{ $tab['label'] }}
+				   class="px-4 py-2 rounded-full text-sm font-medium border shadow-sm transition-colors {{ $isActive ? $m['active'] : ($m['bg'] . ' ' . $m['text']) }}">
+					{{ $m['label'] }}
 				</a>
 			@endforeach
 		</div>

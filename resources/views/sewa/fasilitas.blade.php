@@ -9,18 +9,28 @@
 			<span class="mx-2">/</span>
 			<span class="text-blue-800 font-medium">Fasilitas</span>
 		</nav>
-		<h1 class="mt-2 text-3xl md:text-4xl font-extrabold text-blue-900">Full Set Dekorasi Wisuda</h1>
-		<p class="text-gray-600">Dekorasi Wisuda dengan Bunga, Meja, Kursi dan Karpet Merah</p>
+		<h1 class="mt-2 text-3xl md:text-4xl font-extrabold text-blue-900">Fasilitas GSG</h1>
+		<p class="text-gray-600">Daftar fasilitas yang tersedia untuk mendukung acara Anda.</p>
 
 		<div class="grid md:grid-cols-3 gap-8 mt-6">
 			<div class="md:col-span-2 grid md:grid-cols-3 gap-4">
-				<div class="md:col-span-3 relative">
-					<img src="{{ asset('img/wisuda.jpg') }}" alt="Full Set Dekor Wisuda" class="w-full h-64 md:h-80 object-cover rounded-2xl shadow-md">
-					<span class="absolute bottom-3 left-3 bg-white/90 text-gray-800 text-xs px-3 py-1 rounded-full shadow">Paket lengkap dekorasi</span>
-				</div>
-				<img src="{{ asset('img/konser.jpeg') }}" alt="Galeri 1" class="w-full h-40 object-cover rounded-2xl shadow-md">
-				<img src="{{ asset('img/workshop.jpg') }}" alt="Galeri 2" class="w-full h-40 object-cover rounded-2xl shadow-md">
-				<img src="{{ asset('img/wisuda.jpeg') }}" alt="Galeri 3" class="w-full h-40 object-cover rounded-2xl shadow-md">
+				@if(isset($fasilitas) && $fasilitas->count())
+					@foreach($fasilitas as $f)
+						<div class="bg-white rounded-2xl overflow-hidden shadow-sm">
+							<img src="{{ $f->image ? asset('storage/' . ltrim($f->image, '/')) : asset('img/placeholder.jpg') }}" alt="{{ $f->nama }}" class="w-full h-40 object-cover">
+							<div class="p-4">
+								<h3 class="font-semibold text-blue-900">{{ $f->nama }}</h3>
+								<p class="text-sm text-gray-600">Rp {{ number_format($f->harga,0,',','.') }}</p>
+							</div>
+						</div>
+					@endforeach
+				@else
+					<div class="md:col-span-3">
+						<div class="bg-white rounded-2xl p-6 text-center">
+							<p class="text-gray-600">Belum ada data fasilitas. Silakan hubungi admin untuk informasi lebih lanjut.</p>
+						</div>
+					</div>
+				@endif
 			</div>
 
 			<aside class="bg-white border rounded-2xl p-6 h-max sticky top-24 shadow-sm">

@@ -15,12 +15,12 @@
 				<!-- Title -->
 				<div class="flex items-start justify-between gap-4">
 					<div>
-						<h1 class="text-3xl md:text-4xl font-extrabold text-blue-900">Gedung Serba Guna</h1>
-						<p class="text-gray-600">Penyewaan Gedung Serba Guna Universitas Lampung</p>
+						<h1 class="text-3xl md:text-4xl font-extrabold text-blue-900">{{ $gedung->nama ?? 'Gedung Serba Guna' }}</h1>
+						<p class="text-gray-600">{{ $gedung->deskripsi ?? 'Penyewaan Gedung Serba Guna Universitas Lampung' }}</p>
 					</div>
 					<span class="hidden md:inline-flex items-center gap-2 bg-white border rounded-full px-4 py-2 shadow-sm">
 						<i class="fa-solid fa-location-dot text-blue-700"></i>
-						<span class="text-sm text-gray-700">Kampus Unila, Gedong Meneng</span>
+						<span class="text-sm text-gray-700">{{ $gedung->lokasi ?? 'Kampus Unila, Gedong Meneng' }}</span>
 					</span>
 				</div>
 

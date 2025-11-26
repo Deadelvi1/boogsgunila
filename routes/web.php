@@ -29,9 +29,9 @@ Route::get('/quote', [PublicController::class, 'quote'])->name('public.quote');
 Route::view('/tentang', 'tentang')->name('tentang');
 Route::get('/jadwal', [PublicController::class, 'jadwal'])->name('public.jadwal');
 
-// Public sewa pages
-Route::view('/sewa/gedung', 'sewa.gedung')->name('public.sewa.gedung');
-Route::view('/sewa/fasilitas', 'sewa.fasilitas')->name('public.sewa.fasilitas');
+// Public sewa pages (use controller to provide data)
+Route::get('/sewa/gedung', [PublicController::class, 'gedung'])->name('public.sewa.gedung');
+Route::get('/sewa/fasilitas', [PublicController::class, 'fasilitas'])->name('public.sewa.fasilitas');
 
 // Guest only routes (only accessible when not logged in)
 Route::middleware('guest')->group(function () {
