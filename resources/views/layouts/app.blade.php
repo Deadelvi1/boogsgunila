@@ -26,12 +26,37 @@
     
     @include('layouts.footer')
     
+    <!-- Flash toast for public pages -->
+    <div id="flash-toast" class="fixed top-6 right-6 z-50 hidden">
+        <div id="flash-inner" class="max-w-sm bg-green-600 text-white px-4 py-3 rounded-lg shadow-lg"></div>
+    </div>
+
+    <div id="flash-data" data-success="{{ e(session('success')) }}" data-error="{{ e(session('error')) }}"></div>
+
     <script>
-        window.onpageshow = function(event) {
-            if (event.persisted) {
-                window.location.reload();
+        (function(){
+            window.onpageshow = function(event) {
+                if (event.persisted) {
+                    window.location.reload();
+                }
+            };
+
+            var data = document.getElementById('flash-data');
+            if (!data) return;
+            var msg = data.dataset.success || data.dataset.error || '';
+            var isError = !!data.dataset.error && !data.dataset.success;
+            if (!msg) return;
+            var toast = document.getElementById('flash-toast');
+            var inner = document.getElementById('flash-inner');
+            inner.textContent = msg;
+            if (isError) {
+                inner.classList.remove('bg-green-600');
+                inner.classList.add('bg-red-600');
             }
-        };
+            toast.classList.remove('hidden');
+            setTimeout(function(){ toast.classList.add('opacity-100'); }, 10);
+            setTimeout(function(){ toast.classList.add('hidden'); }, 4000);
+        })();
     </script>
 </body>
 </html>

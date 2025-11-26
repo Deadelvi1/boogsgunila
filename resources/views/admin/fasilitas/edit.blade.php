@@ -7,7 +7,7 @@
 </div>
 
 <div class="bg-white rounded-xl shadow p-6">
-    <form action="{{ route('fasilitas.update', $item->id) }}" method="POST" class="space-y-4">
+    <form action="{{ route('fasilitas.update', $item->id) }}" method="POST" enctype="multipart/form-data" class="space-y-4">
         @csrf @method('PUT')
         <div>
             <label class="block text-sm font-medium">Nama</label>
@@ -26,6 +26,20 @@
         <div>
             <label class="block text-sm font-medium">Deskripsi (opsional)</label>
             <textarea name="deskripsi" class="mt-1 w-full border rounded px-3 py-2" rows="4">{{ $item->deskripsi }}</textarea>
+        </div>
+        <div>
+            <label class="block text-sm font-medium">Gambar Saat Ini</label>
+            @if($item->image)
+                <div class="mt-2">
+                    <img src="{{ asset('storage/'.$item->image) }}" alt="{{ $item->nama }}" class="max-w-xs rounded">
+                </div>
+            @else
+                <div class="text-gray-500">Tidak ada gambar</div>
+            @endif
+        </div>
+        <div class="mt-2">
+            <label class="block text-sm font-medium">Unggah Gambar Baru (opsional)</label>
+            <input type="file" name="image" accept="image/*" class="mt-1 w-full">
         </div>
 
         <div class="flex gap-2 pt-3">

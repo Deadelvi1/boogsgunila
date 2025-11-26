@@ -205,7 +205,18 @@ class AdminController extends Controller
 			$updateData['proposal_file'] = $filePath;
 		}
 
+		$oldStatus = $booking->status;
+
 		$booking->update($updateData);
+
+		// Prepare friendly message if status changed
+		$statusLabels = ['1' => 'Menunggu', '2' => 'Disetujui', '3' => 'Ditolak', '4' => 'Selesai'];
+		if (isset($updateData['status']) && $oldStatus !== $updateData['status']) {
+			$oldLabel = $statusLabels[$oldStatus] ?? $oldStatus;
+			$newLabel = $statusLabels[$updateData['status']] ?? $updateData['status'];
+			$msg = "Status booking \"{$booking->event_name}\" diubah dari {$oldLabel} menjadi {$newLabel}.";
+			return redirect()->route('admin.schedules.index')->with('success', $msg);
+		}
 
 		// Update fasilitas
 		$booking->bookingFasilitas()->delete();

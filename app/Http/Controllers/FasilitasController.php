@@ -34,6 +34,12 @@ class FasilitasController extends Controller
             'stok' => 'required|integer|min:0',
             'deskripsi' => 'nullable|string',
         ]);
+        $imagePath = null;
+        if ($request->hasFile('image')) {
+            $imagePath = $request->file('image')->store('fasilitas', 'public');
+        }
+
+        $validated['image'] = $imagePath;
 
         Fasilitas::create($validated);
         return redirect()->route('fasilitas.index')->with('success', 'Fasilitas berhasil ditambahkan.');
@@ -55,6 +61,15 @@ class FasilitasController extends Controller
         ]);
 
         $item = Fasilitas::findOrFail($id);
+        // handle image replacement
+        if ($request->hasFile('image')) {
+            // delete old image if exists
+            if ($item->image && \Illuminate\Support\Facades\Storage::disk('public')->exists($item->image)) {
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($item->image);
+            }
+            $validated['image'] = $request->file('image')->store('fasilitas', 'public');
+        }
+
         $item->update($validated);
         return redirect()->route('fasilitas.index')->with('success', 'Fasilitas berhasil diperbarui.');
     }
@@ -66,6 +81,10 @@ class FasilitasController extends Controller
         $used = \App\Models\BookingFasilitas::where('fasilitas_id', $item->id)->exists();
         if ($used) {
             return redirect()->route('fasilitas.index')->with('error', 'Tidak dapat menghapus fasilitas karena sedang digunakan pada booking.');
+        }
+        // delete image file
+        if ($item->image && \Illuminate\Support\Facades\Storage::disk('public')->exists($item->image)) {
+            \Illuminate\Support\Facades\Storage::disk('public')->delete($item->image);
         }
         $item->delete();
         return redirect()->route('fasilitas.index')->with('success', 'Fasilitas berhasil dihapus.');
