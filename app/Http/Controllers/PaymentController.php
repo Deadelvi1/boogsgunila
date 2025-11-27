@@ -61,6 +61,24 @@ class PaymentController extends Controller
 		]);
 	}
 
+	public function showUploadForm($paymentId)
+	{
+		$payment = Payment::with('booking')->where('id', $paymentId)
+			->whereHas('booking', function ($q) {
+				$q->where('user_id', Auth::id());
+			})->firstOrFail();
+
+		$booking = $payment->booking;
+		$paymentAccounts = \App\Models\PaymentAccount::where('is_active', true)->orderBy('type')->orderBy('name')->get();
+
+		return view('payments.upload', [
+			'title' => 'Upload Bukti Pembayaran',
+			'payment' => $payment,
+			'booking' => $booking,
+			'paymentAccounts' => $paymentAccounts,
+		]);
+	}
+
 	public function uploadProof(Request $request, $paymentId)
 	{
 		$request->validate([
@@ -104,7 +122,7 @@ class PaymentController extends Controller
 
 		$payment->update($updateData);
 
-		return back()->with('success', 'Bukti pembayaran berhasil diunggah. Menunggu verifikasi admin.');
+		return redirect()->route('payments.index')->with('success', 'Bukti pembayaran berhasil diunggah. Menunggu verifikasi admin.');
 	}
 
 	// Admin only quick status updates

@@ -7,6 +7,16 @@
 </div>
 
 <div class="bg-white rounded-xl shadow p-6">
+    @if($errors->any())
+        <div class="mb-4 p-3 bg-red-50 border border-red-200 rounded text-sm text-red-700">
+            <strong>Terjadi kesalahan:</strong>
+            <ul class="list-disc list-inside mt-2">
+                @foreach($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
     <form action="{{ route('admin.booking.update', $item->id) }}" method="POST" enctype="multipart/form-data" class="space-y-4">
         @csrf @method('PUT')
         <div class="grid md:grid-cols-2 gap-4">
@@ -74,14 +84,26 @@
             </div>
         </div>
 
-        <div>
-            <label class="block text-sm font-medium">Status</label>
-            <select name="status" class="mt-1 w-full border rounded px-3 py-2">
-                <option value="1" {{ $item->status==='1' ? 'selected' : '' }}>Menunggu</option>
-                <option value="2" {{ $item->status==='2' ? 'selected' : '' }}>Disetujui</option>
-                <option value="3" {{ $item->status==='3' ? 'selected' : '' }}>Ditolak</option>
-                <option value="4" {{ $item->status==='4' ? 'selected' : '' }}>Selesai</option>
-            </select>
+        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+            <label class="block text-sm font-semibold text-gray-800 mb-3">Ubah Status Booking</label>
+            <div class="grid grid-cols-4 gap-2">
+                <label class="flex flex-col items-center p-3 border-2 rounded cursor-pointer transition hover:bg-yellow-50" style="border-color: {{ $item->status === '1' ? '#fbbf24' : '#e5e7eb' }};background-color: {{ $item->status === '1' ? '#fffbeb' : 'white' }};">
+                    <input type="radio" name="status" value="1" class="mb-1" {{ $item->status==='1' ? 'checked' : '' }} required>
+                    <span class="text-xs font-medium text-center">Menunggu</span>
+                </label>
+                <label class="flex flex-col items-center p-3 border-2 rounded cursor-pointer transition hover:bg-green-50" style="border-color: {{ $item->status === '2' ? '#22c55e' : '#e5e7eb' }};background-color: {{ $item->status === '2' ? '#f0fdf4' : 'white' }};">
+                    <input type="radio" name="status" value="2" class="mb-1" {{ $item->status==='2' ? 'checked' : '' }} required>
+                    <span class="text-xs font-medium text-center">Disetujui</span>
+                </label>
+                <label class="flex flex-col items-center p-3 border-2 rounded cursor-pointer transition hover:bg-red-50" style="border-color: {{ $item->status === '3' ? '#ef4444' : '#e5e7eb' }};background-color: {{ $item->status === '3' ? '#fef2f2' : 'white' }};">
+                    <input type="radio" name="status" value="3" class="mb-1" {{ $item->status==='3' ? 'checked' : '' }} required>
+                    <span class="text-xs font-medium text-center">Ditolak</span>
+                </label>
+                <label class="flex flex-col items-center p-3 border-2 rounded cursor-pointer transition hover:bg-blue-50" style="border-color: {{ $item->status === '4' ? '#3b82f6' : '#e5e7eb' }};background-color: {{ $item->status === '4' ? '#eff6ff' : 'white' }};">
+                    <input type="radio" name="status" value="4" class="mb-1" {{ $item->status==='4' ? 'checked' : '' }} required>
+                    <span class="text-xs font-medium text-center">Selesai</span>
+                </label>
+            </div>
         </div>
 
         <div>
@@ -102,22 +124,37 @@
         <div>
             <label class="block text-sm font-medium">Fasilitas (opsional)</label>
             <div class="mt-2 space-y-2">
-                @foreach($fasilitas as $f)
+                @foreach($fasilitas as $idx => $f)
                     @php
                         $bf = $item->bookingFasilitas->firstWhere('fasilitas_id', $f->id);
                     @endphp
                     <div class="flex items-center gap-3">
-                        <input type="checkbox" name="fasilitas[][id]" value="{{ $f->id }}" {{ $bf ? 'checked' : '' }}>
-                        <div class="flex-1">
-                            <label class="text-sm font-medium">{{ $f->nama }} (Rp {{ number_format($f->harga ?? 0) }})</label>
-                        </div>
-                        <div>
-                            <input type="number" name="fasilitas[][jumlah]" min="1" value="{{ $bf->jumlah ?? 1 }}" class="w-20 border rounded px-2 py-1">
-                        </div>
+                        <input type="checkbox" id="f_{{ $f->id }}" value="1" {{ $bf ? 'checked' : '' }} onchange="toggleFasilitasInput(this, {{ $idx }})">
+                        <label for="f_{{ $f->id }}" class="flex-1 text-sm font-medium cursor-pointer">{{ $f->nama }} (Rp {{ number_format($f->harga ?? 0) }})</label>
+                        <input type="hidden" name="fasilitas_id_{{ $idx }}" value="{{ $f->id }}" {{ !$bf ? 'disabled' : '' }}>
+                        <input type="number" name="fasilitas_qty_{{ $idx }}" min="1" value="{{ $bf->jumlah ?? 1 }}" class="w-20 border rounded px-2 py-1" {{ !$bf ? 'disabled' : '' }}>
                     </div>
                 @endforeach
             </div>
         </div>
+
+        <script>
+            function toggleFasilitasInput(checkbox, idx) {
+                const idInput = document.querySelector('input[name="fasilitas_id_' + idx + '"]');
+                const qtyInput = document.querySelector('input[name="fasilitas_qty_' + idx + '"]');
+                if (checkbox.checked) {
+                    idInput.disabled = false;
+                    qtyInput.disabled = false;
+                    idInput.name = 'fasilitas[' + idx + '][id]';
+                    qtyInput.name = 'fasilitas[' + idx + '][jumlah]';
+                } else {
+                    idInput.disabled = true;
+                    qtyInput.disabled = true;
+                    idInput.name = 'fasilitas_id_' + idx;
+                    qtyInput.name = 'fasilitas_qty_' + idx;
+                }
+            }
+        </script>
 
         <div class="flex gap-2 pt-3">
             <a href="{{ route('admin.schedules.index') }}" class="px-4 py-2 border rounded">Batal</a>

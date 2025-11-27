@@ -103,7 +103,7 @@
                                 @csrf
                             </form>
                             <button type="button"
-                                    onclick="event.preventDefault(); document.getElementById('logout-form').submit();" 
+                                    onclick="event.preventDefault(); if(confirm('Anda yakin ingin logout?')){ document.getElementById('logout-form').submit(); }" 
                                     class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                                     role="menuitem"
                                     tabindex="-1">
@@ -186,7 +186,7 @@
                        class="text-gray-700 hover:text-blue-900 block px-3 py-2 rounded-md text-base font-medium transition duration-300">
                         Profile
                     </a>
-                    <a href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();" 
+                    <a href="#" onclick="event.preventDefault(); if(confirm('Anda yakin ingin logout?')){ document.getElementById('logout-form').submit(); }" 
                        class="text-gray-700 hover:text-blue-900 block w-full text-left px-3 py-2 rounded-md text-base font-medium transition duration-300">
                         Logout
                     </a>

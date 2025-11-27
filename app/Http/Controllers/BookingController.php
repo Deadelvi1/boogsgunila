@@ -26,10 +26,10 @@ class BookingController extends Controller
         }
         
         $data = [
-            'title' => 'List Booking',
+            'title' => 'Booking Saya',
             'items' => $query->latest()->get(),
         ];
-        return view('list_booking', $data);
+        return view('booking.index', $data);
     }
 
     public function create()
@@ -154,7 +154,7 @@ class BookingController extends Controller
             $amount = ($hours * self::BASE_RATE_PER_HOUR * $days) + $facilitiesTotal;
         }
 
-        \App\Models\Payment::create([
+        $payment = \App\Models\Payment::create([
             'booking_id' => $booking->id,
             'amount' => $amount,
             'method' => 'pending',
@@ -162,7 +162,8 @@ class BookingController extends Controller
             'status' => '0', // pending
         ]);
 
-        return redirect()->route('booking.invoice', $booking->id)->with('success', 'Booking berhasil dibuat.');
+        // Redirect user directly to payment upload form so they can pay immediately
+        return redirect()->route('payments.upload.form', $payment->id)->with('success', 'Booking berhasil dibuat. Silakan lakukan pembayaran.');
     }
 
     public function edit($id)
@@ -176,7 +177,7 @@ class BookingController extends Controller
         
         $gedung = Gedung::orderBy('nama')->get();
         $fasilitas = Fasilitas::orderBy('nama')->get();
-        return view('edit_booking', [
+        return view('booking.edit', [
             'title' => 'Edit Booking',
             'item' => $booking,
             'gedung' => $gedung,
@@ -230,7 +231,7 @@ class BookingController extends Controller
         }
         
         $paymentAccounts = \App\Models\PaymentAccount::where('is_active', true)->orderBy('type')->orderBy('name')->get();
-        return view('booking_invoice', [
+        return view('booking.invoice', [
             'title' => 'Invoice Booking',
             'booking' => $booking,
             'payment' => $payment,

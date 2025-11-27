@@ -17,6 +17,15 @@ class AdminController extends Controller
 
 	public function index()
 	{
+		// Ringkasan booking terbaru
+		$recentBookings = Booking::with(['user', 'gedung'])
+			->latest('created_at')
+			->limit(5)
+			->get();
+
+		// Data fasilitas lengkap dengan harga
+		$fasilitas = Fasilitas::orderBy('nama')->get();
+
 		return view('admin.dashboard', [
 			'title' => 'Admin Dashboard',
 			'stats' => [
@@ -26,7 +35,11 @@ class AdminController extends Controller
 				'fasilitas' => Fasilitas::count(),
 				'payments_pending' => Payment::where('status', '1')->count(),
 				'active_rentals' => Booking::where('status', '2')->count(),
+				'pending_approval' => Booking::where('status', '1')->count(),
+				'rejected_bookings' => Booking::where('status', '3')->count(),
 			],
+			'recentBookings' => $recentBookings,
+			'fasilitas' => $fasilitas,
 		]);
 	}
 
@@ -315,6 +328,71 @@ class AdminController extends Controller
 			'payment' => $payment,
 			'paymentAccounts' => $paymentAccounts,
 		]);
+	}
+
+	public function approveBooking($id)
+	{
+		$booking = Booking::findOrFail($id);
+		
+		// Validasi: hanya status '1' (pending) yang bisa disetujui
+		if ($booking->status !== '1') {
+			return redirect()->back()->with('error', 'Hanya booking dengan status Menunggu yang dapat disetujui.');
+		}
+
+		$booking->update(['status' => '2']);
+		
+		return redirect()->back()->with('success', 'Booking "' . $booking->event_name . '" berhasil disetujui.');
+	}
+
+	public function rejectBooking($id)
+	{
+		$booking = Booking::findOrFail($id);
+		
+		// Validasi: hanya status '1' (pending) yang bisa ditolak
+		if ($booking->status !== '1') {
+			return redirect()->back()->with('error', 'Hanya booking dengan status Menunggu yang dapat ditolak.');
+		}
+
+		$booking->update(['status' => '3']);
+		
+		return redirect()->back()->with('success', 'Booking "' . $booking->event_name . '" berhasil ditolak.');
+	}
+
+	// API endpoint untuk get status booking (untuk dynamic update di schedules)
+	public function apiGetStatus($id)
+	{
+		$booking = Booking::findOrFail($id);
+		$payment = Payment::where('booking_id', $id)->first();
+
+		return response()->json([
+			'status' => $booking->status,
+			'payment_status' => $payment ? $payment->status : null,
+		]);
+	}
+
+	// API endpoint untuk delete booking (untuk AJAX delete di schedules)
+	public function apiDeleteBooking($id)
+	{
+		try {
+			$booking = Booking::findOrFail($id);
+
+			// Authorize - only admin
+			if (auth()->user()->role !== 'A') {
+				return response()->json(['message' => 'Unauthorized'], 403);
+			}
+
+			$booking->delete();
+
+			return response()->json([
+				'success' => true,
+				'message' => 'Jadwal berhasil dihapus.',
+			]);
+		} catch (\Exception $e) {
+			return response()->json([
+				'success' => false,
+				'message' => 'Gagal menghapus jadwal: ' . $e->getMessage(),
+			], 500);
+		}
 	}
 }
 

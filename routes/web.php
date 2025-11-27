@@ -68,6 +68,7 @@ Route::middleware(['auth'])->group(function () {
     // Payment management
     Route::prefix('payments')->name('payments.')->group(function () {
         Route::get('/', [PaymentController::class, 'index'])->name('index');
+        Route::get('/{id}/upload', [PaymentController::class, 'showUploadForm'])->name('upload.form');
         Route::post('/{id}/upload', [PaymentController::class, 'uploadProof'])->name('upload');
     });
     
@@ -93,18 +94,17 @@ Route::middleware(['auth', 'role:A'])->prefix('admin')->name('admin.')->group(fu
     // Admin Schedules & Rentals
     Route::get('/schedules', [AdminController::class, 'schedulesIndex'])->name('schedules.index');
     Route::get('/rentals', [AdminController::class, 'rentalsIndex'])->name('rentals.index');
+
+    // API endpoints untuk dynamic updates di admin schedules
+    Route::prefix('api/booking')->name('api.booking.')->group(function () {
+        Route::get('/{id}/status', [AdminController::class, 'apiGetStatus'])->name('status');
+        Route::post('/{id}/delete', [AdminController::class, 'apiDeleteBooking'])->name('delete');
+    });
     
     // Admin Booking Actions
     Route::prefix('booking')->name('booking.')->group(function () {
-        Route::put('/{id}/approve', function ($id) {
-            \App\Models\Booking::where('id', $id)->update(['status' => '2']);
-            return redirect()->back()->with('success', 'Booking disetujui.');
-        })->name('approve');
-        
-        Route::put('/{id}/reject', function ($id) {
-            \App\Models\Booking::where('id', $id)->update(['status' => '3']);
-            return redirect()->back()->with('success', 'Booking ditolak.');
-        })->name('reject');
+        Route::put('/{id}/approve', [AdminController::class, 'approveBooking'])->name('approve');
+        Route::put('/{id}/reject', [AdminController::class, 'rejectBooking'])->name('reject');
     });
 
     // Admin create booking (uses admin layout)
