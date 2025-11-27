@@ -36,41 +36,57 @@ Route::get('/sewa/fasilitas', [PublicController::class, 'fasilitas'])->name('pub
 // Guest only routes (only accessible when not logged in)
 Route::middleware('guest')->group(function () {
     Route::get('/', [PublicController::class, 'home']);
-    
+
     // Authentication routes
     Route::get('/register', [AuthController::class, 'showRegister'])->name('auth.register.form');
     Route::post('/register', [AuthController::class, 'register'])->name('auth.register');
+
     Route::get('/login', [AuthController::class, 'showLogin'])->name('auth.login.form');
     Route::post('/login', [AuthController::class, 'login'])->name('auth.login');
+
+    // OTP verification
+    Route::get('/verify-otp', [AuthController::class, 'showOtpForm'])->name('auth.otp.form');
+    Route::post('/verify-otp', [AuthController::class, 'verifyOtp'])->name('auth.otp.verify');
 });
+
+
+// Halaman form OTP
+Route::get('/verify-otp', [AuthController::class, 'showOtpForm'])
+    ->name('otp.verify.show');
+
+// Proses verifikasi OTP
+Route::post('/verify-otp', [AuthController::class, 'verifyOtp'])
+    ->name('otp.verify');
+Route::get('/otp/verify', [AuthController::class, 'showOtpForm'])->name('otp.verify.show');
+Route::post('/otp/verify', [AuthController::class, 'verifyOtp'])->name('otp.verify');
 
 // Authenticated routes (require login)
 Route::middleware(['auth'])->group(function () {
     // Dashboard
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
-    
+
     // Profile management
     Route::get('/profile', [ProfileController::class, 'index'])->name('profile');
     Route::put('/profile/update', [ProfileController::class, 'update'])->name('profile.update');
-    
+
     // Booking management
     Route::prefix('booking')->name('booking.')->group(function () {
         Route::get('/', [BookingController::class, 'index'])->name('index');
         Route::get('/create', [BookingController::class, 'create'])->name('create');
         Route::post('/', [BookingController::class, 'store'])->name('store');
-    Route::put('/{id}/cancel', [BookingController::class, 'cancel'])->name('cancel');
+        Route::put('/{id}/cancel', [BookingController::class, 'cancel'])->name('cancel');
         Route::get('/{id}/edit', [BookingController::class, 'edit'])->name('edit');
         Route::put('/{id}', [BookingController::class, 'update'])->name('update');
         Route::delete('/{id}', [BookingController::class, 'destroy'])->name('destroy');
         Route::get('/{id}/invoice', [BookingController::class, 'invoice'])->name('invoice');
     });
-    
+
     // Payment management
     Route::prefix('payments')->name('payments.')->group(function () {
         Route::get('/', [PaymentController::class, 'index'])->name('index');
         Route::post('/{id}/upload', [PaymentController::class, 'uploadProof'])->name('upload');
     });
-    
+
     // Logout
     Route::post('/logout', [AuthController::class, 'logout'])->name('auth.logout');
 });
@@ -79,7 +95,7 @@ Route::middleware(['auth'])->group(function () {
 Route::middleware(['auth', 'role:A'])->prefix('admin')->name('admin.')->group(function () {
     // Admin Dashboard
     Route::get('/', [AdminController::class, 'index'])->name('dashboard');
-    
+
     // Admin Users CRUD
     Route::prefix('users')->name('users.')->group(function () {
         Route::get('/', [AdminController::class, 'usersIndex'])->name('index');
@@ -89,18 +105,18 @@ Route::middleware(['auth', 'role:A'])->prefix('admin')->name('admin.')->group(fu
         Route::put('/{id}', [AdminController::class, 'usersUpdate'])->name('update');
         Route::delete('/{id}', [AdminController::class, 'usersDestroy'])->name('destroy');
     });
-    
+
     // Admin Schedules & Rentals
     Route::get('/schedules', [AdminController::class, 'schedulesIndex'])->name('schedules.index');
     Route::get('/rentals', [AdminController::class, 'rentalsIndex'])->name('rentals.index');
-    
+
     // Admin Booking Actions
     Route::prefix('booking')->name('booking.')->group(function () {
         Route::put('/{id}/approve', function ($id) {
             \App\Models\Booking::where('id', $id)->update(['status' => '2']);
             return redirect()->back()->with('success', 'Booking disetujui.');
         })->name('approve');
-        
+
         Route::put('/{id}/reject', function ($id) {
             \App\Models\Booking::where('id', $id)->update(['status' => '3']);
             return redirect()->back()->with('success', 'Booking ditolak.');
@@ -113,7 +129,7 @@ Route::middleware(['auth', 'role:A'])->prefix('admin')->name('admin.')->group(fu
     Route::get('/booking/{id}/edit', [AdminController::class, 'bookingEdit'])->name('booking.edit');
     Route::put('/booking/{id}', [AdminController::class, 'bookingUpdate'])->name('booking.update');
     Route::get('/booking/{id}/invoice', [AdminController::class, 'bookingInvoice'])->name('booking.invoice');
-    
+
     // Payment Verification
     Route::prefix('payments')->name('payments.')->group(function () {
         Route::get('/', [PaymentController::class, 'adminIndex'])->name('index');
@@ -132,7 +148,7 @@ Route::middleware(['auth', 'role:A'])->group(function () {
         Route::put('/{id}', [GedungController::class, 'update'])->name('update');
         Route::delete('/{id}', [GedungController::class, 'destroy'])->name('destroy');
     });
-    
+
     // Fasilitas management
     Route::prefix('fasilitas')->name('fasilitas.')->group(function () {
         Route::get('/', [FasilitasController::class, 'index'])->name('index');
