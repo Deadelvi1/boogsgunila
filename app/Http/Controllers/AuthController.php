@@ -3,19 +3,19 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Models\MahasiswaOtp;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Auth\Events\Registered;
+use Illuminate\Support\Facades\Mail;
 
 class AuthController extends Controller
 {
     public function __construct()
     {
-        // Apply guest middleware only to login and register routes
-        $this->middleware('guest')->only(['showLogin', 'login', 'showRegister', 'register']);
-        // Apply auth middleware only to logout
+        $this->middleware('guest')->only(['showLogin', 'login', 'showRegister', 'register', 'showOtpForm', 'verifyOtp']);
         $this->middleware('auth')->only('logout');
     }
+
     public function showRegister()
     {
         return view('auth.register', ['title' => 'Register']);
@@ -37,14 +37,70 @@ class AuthController extends Controller
             'password.confirmed' => 'Konfirmasi password tidak cocok',
         ]);
 
+        // Buat user namun belum login
         $user = User::create([
             'name' => $data['name'],
             'email' => $data['email'],
             'password' => bcrypt($data['password']),
             'role' => 'U',
         ]);
+
+        // Generate OTP
+        $otp = rand(100000, 999999);
+
+        // Simpan OTP di tabel mahasiswa_otps
+        MahasiswaOtp::create([
+            'email' => $data['email'],
+            'otp' => $otp,
+            'expired_at' => now()->addMinutes(10),
+        ]);
+
+        // Kirim OTP via email
+        Mail::raw("Kode OTP Anda adalah: $otp (berlaku 10 menit).", function ($message) use ($user) {
+            $message->to($user->email)
+                ->subject('Kode OTP Registrasi');
+        });
+
+        return redirect()->route('otp.verify.show', ['email' => $user->email]);
+    }
+
+    public function showOtpForm(Request $request)
+    {
+        return view('auth.verify-otp', [
+            'title' => 'Verifikasi OTP',
+            'email' => $request->email
+        ]);
+    }
+
+    public function verifyOtp(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email',
+            'otp'   => 'required|digits:6',
+        ]);
+
+        // Ambil OTP berdasarkan email + OTP
+        $otp = MahasiswaOtp::where('email', $request->email)
+            ->where('otp', $request->otp)
+            ->latest()
+            ->first();
+
+        if (!$otp) {
+            return back()->withErrors(['otp' => 'OTP salah']);
+        }
+
+        if (now()->greaterThan($otp->expired_at)) {
+            return back()->withErrors(['otp' => 'OTP telah kedaluwarsa']);
+        }
+
+        // Hapus OTP setelah benar
+        $otp->delete();
+
+        // Login user
+        $user = User::where('email', $request->email)->first();
         Auth::login($user);
-        return redirect()->route('booking.index');
+
+        return redirect()->route('home')->with('success', 'Registrasi berhasil, Anda telah login.');
     }
 
     public function showLogin()
@@ -63,7 +119,7 @@ class AuthController extends Controller
             $request->session()->regenerate();
 
             $user = Auth::user();
-            if ($user && $user->role === 'A') {
+            if ($user->role === 'A') {
                 return redirect()->route('admin.dashboard');
             }
 
@@ -81,5 +137,3 @@ class AuthController extends Controller
         return redirect('/')->with('success', 'Anda telah berhasil logout.');
     }
 }
-
-
