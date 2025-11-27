@@ -1,4 +1,5 @@
-@extends('layouts.app')
+@php $layout = (auth()->check() && auth()->user()->role === 'A') ? 'admin.layout' : 'layouts.app'; @endphp
+@extends($layout)
 
 @section('content')
 <div class="min-h-screen bg-gray-50 py-8">
@@ -16,7 +17,7 @@
                 <div class="flex items-center space-x-8 mb-8">
                     <div class="flex-shrink-0">
                         <div class="w-32 h-32 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
-                            <img src="{{ asset('img/dea.png') }}" alt="Profile Photo" class="w-full h-full object-cover">
+                            <img src="{{ auth()->user()->profile_photo_url ?? asset('img/dea.png') }}" alt="Profile Photo" class="w-full h-full object-cover" data-default-src="{{ asset('img/dea.png') }}" onerror="this.src=this.dataset.defaultSrc">
                         </div>
                     </div>
                     <div>
@@ -25,9 +26,14 @@
                     </div>
                 </div>
 
-                <form action="{{ route('profile.update') }}" method="POST" class="space-y-6">
+                <form action="{{ route('profile.update') }}" method="POST" enctype="multipart/form-data" class="space-y-6">
                     @csrf
                     @method('PUT')
+                    <div>
+                        <label for="profile_photo" class="block text-sm font-medium text-gray-700">Foto Profil (opsional)</label>
+                        <input type="file" name="profile_photo" id="profile_photo" accept="image/*" class="mt-1 block w-full text-sm">
+                        @error('profile_photo')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
+                    </div>
                     
                     <div>
                         <label for="name" class="block text-sm font-medium text-gray-700">Nama</label>

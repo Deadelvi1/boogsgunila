@@ -14,7 +14,7 @@
 @endif
 
 <div class="bg-white rounded-xl shadow p-6">
-	<form method="POST" action="{{ route('fasilitas.store') }}">
+	<form method="POST" action="{{ route('fasilitas.store') }}" enctype="multipart/form-data">
 		@csrf
 		<div class="space-y-4">
 			<div>
@@ -40,6 +40,10 @@
 					class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
 					placeholder="Deskripsi fasilitas...">{{ old('deskripsi') }}</textarea>
 			</div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Gambar (opsional)</label>
+                <input type="file" name="image" accept="image/*" class="w-full">
+            </div>
 			<div class="flex gap-2 pt-4">
 				<button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">Simpan</button>
 				<a href="{{ route('fasilitas.index') }}" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded">Batal</a>

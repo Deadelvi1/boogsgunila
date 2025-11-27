@@ -13,7 +13,7 @@
                 <p class="text-gray-600 text-lg mb-6">
                     Tempat terbaik untuk reservasi acara kampus tanpa ribet tidak menghabiskan waktu.
                 </p>
-                <a href="#sewa" class="inline-block bg-blue-500 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-600 transition duration-300 mb-8">
+                <a href="{{ route('public.sewa.fasilitas') }}" class="inline-block bg-blue-500 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-600 transition duration-300 mb-8">
                     Lebih Lanjut
                 </a>
                 
@@ -52,11 +52,11 @@
                 <i class="fas fa-calendar-alt text-xl"></i>
                 <span class="font-medium">Lihat Jadwal</span>
             </a>
-            <a href="#sewa" class="bg-blue-100 hover:bg-blue-200 text-gray-700 px-6 py-4 rounded-lg flex items-center gap-3 transition duration-300">
+            <a href="{{ route('public.sewa.fasilitas') }}" class="bg-blue-100 hover:bg-blue-200 text-gray-700 px-6 py-4 rounded-lg flex items-center gap-3 transition duration-300">
                 <i class="fas fa-user text-xl"></i>
                 <span class="font-medium">Fasilitas</span>
             </a>
-            <a href="#lokasi" class="bg-blue-100 hover:bg-blue-200 text-gray-700 px-6 py-4 rounded-lg flex items-center gap-3 transition duration-300">
+            <a href="{{ route('public.sewa.gedung') }}" class="bg-blue-100 hover:bg-blue-200 text-gray-700 px-6 py-4 rounded-lg flex items-center gap-3 transition duration-300">
                 <i class="fas fa-map-marker-alt text-xl"></i>
                 <span class="font-medium">Lokasi GSG</span>
             </a>
@@ -94,7 +94,7 @@ $fasilitasList = array_slice($fasilitasList, 0, 6);
         <h2 class="text-3xl font-bold text-blue-900 mb-8">Fasilitas GSG</h2>
         <div class="grid md:grid-cols-3 gap-6">
             @foreach($fasilitasList as $facility)
-            <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition duration-300">
+            <a href="{{ route('public.sewa.fasilitas') }}" class="block bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition duration-300">
                 <div class="relative">
                     <img 
                         src="{{ facilityImage($facility['nama']) }}" 
@@ -109,7 +109,7 @@ $fasilitasList = array_slice($fasilitasList, 0, 6);
                     <h3 class="font-bold text-blue-900 text-lg mb-1">{{ $facility['nama'] }}</h3>
                     <p class="text-gray-600 text-sm">Deskripsi singkat fasilitas</p>
                 </div>
-            </div>
+            </a>
             @endforeach
         </div>
     </div>

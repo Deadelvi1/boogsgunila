@@ -107,6 +107,31 @@ class PublicController extends Controller
             'filter_date' => $date,
         ]);
     }
+
+    /**
+     * Show the facilities listing page.
+     */
+    public function fasilitas(Request $request)
+    {
+        $fasilitas = Fasilitas::all();
+        return view('sewa.fasilitas', [
+            'title' => 'Fasilitas GSG',
+            'fasilitas' => $fasilitas,
+        ]);
+    }
+
+    /**
+     * Show the gedung (location) page.
+     */
+    public function gedung(Request $request)
+    {
+        // Try to load first gedung for dynamic info; view has sensible defaults
+        $gedung = Gedung::first();
+        return view('sewa.gedung', [
+            'title' => 'Sewa Gedung',
+            'gedung' => $gedung,
+        ]);
+    }
 }
 
 

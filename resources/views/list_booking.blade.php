@@ -26,7 +26,7 @@
                         <th class="p-3">Tanggal</th>
                         <th class="p-3">Waktu</th>
                         <th class="p-3">Status</th>
-                        <th class="p-3 w-40">Aksi</th>
+                        <th class="p-3 w-56">Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -50,29 +50,29 @@
                                 {{ $labels[$item->status] ?? $item->status }}
                             </span>
                         </td>
-                        <td class="p-3">
-                            <div class="flex flex-wrap gap-2">
+                        <td class="p-3 whitespace-nowrap">
+                            <div class="flex items-center space-x-2">
                                 <a href="{{ route('booking.invoice', $item->id) }}" class="px-3 py-1 bg-blue-600 text-white rounded text-xs">Invoice</a>
                                 <a href="{{ route('booking.edit', $item->id) }}" class="px-3 py-1 bg-yellow-500 text-white rounded text-xs">Edit</a>
-                                <form action="{{ route('booking.destroy', $item->id) }}" method="POST" onsubmit="return confirm('Hapus booking ini?')" class="inline">
+                                <form action="{{ route('booking.destroy', $item->id) }}" method="POST" onsubmit="return confirm('Hapus booking ini?')" class="inline-flex">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="px-3 py-1 bg-red-600 text-white rounded text-xs">Hapus</button>
                                 </form>
                                 @if(auth()->check() && auth()->user()->id === $item->user_id && $item->status !== '4')
-                                <form action="{{ route('booking.cancel', $item->id) }}" method="POST" onsubmit="return confirm('Batalkan booking ini?')" class="inline">
+                                <form action="{{ route('booking.cancel', $item->id) }}" method="POST" onsubmit="return confirm('Batalkan booking ini?')" class="inline-flex">
                                     @csrf
                                     @method('PUT')
                                     <button type="submit" class="px-3 py-1 bg-red-400 text-white rounded text-xs">Batal</button>
                                 </form>
                                 @endif
                                 @if(auth()->check() && auth()->user()->role === 'A')
-                                <form action="{{ route('admin.booking.approve', $item->id) }}" method="POST" class="inline">
+                                <form action="{{ route('admin.booking.approve', $item->id) }}" method="POST" class="inline-flex">
                                     @csrf
                                     @method('PUT')
                                     <button type="submit" class="px-3 py-1 bg-green-600 text-white rounded text-xs">Approve</button>
                                 </form>
-                                <form action="{{ route('admin.booking.reject', $item->id) }}" method="POST" class="inline">
+                                <form action="{{ route('admin.booking.reject', $item->id) }}" method="POST" class="inline-flex">
                                     @csrf
                                     @method('PUT')
                                     <button type="submit" class="px-3 py-1 bg-gray-600 text-white rounded text-xs">Reject</button>

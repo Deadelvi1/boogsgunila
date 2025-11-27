@@ -23,6 +23,7 @@
 			</div>
 			<nav class="px-3 py-4 space-y-1 text-sm">
 				<a href="{{ route('admin.dashboard') }}" class="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-blue-50 {{ request()->routeIs('admin.dashboard') ? 'bg-blue-100 text-blue-900 font-semibold' : 'text-gray-700' }}"><i class="fa-solid fa-gauge"></i> Dashboard</a>
+				<a href="{{ route('profile') }}" class="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-blue-50 {{ request()->routeIs('profile') ? 'bg-blue-100 text-blue-900 font-semibold' : 'text-gray-700' }}"><i class="fa-solid fa-user"></i> Profil Saya</a>
 				<a href="{{ route('admin.users.index') }}" class="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-blue-50 {{ request()->routeIs('admin.users.*') ? 'bg-blue-100 text-blue-900 font-semibold' : 'text-gray-700' }}"><i class="fa-solid fa-users"></i> Data Pengguna</a>
 				<a href="{{ route('admin.schedules.index') }}" class="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-blue-50 {{ request()->routeIs('admin.schedules.*') ? 'bg-blue-100 text-blue-900 font-semibold' : 'text-gray-700' }}"><i class="fa-solid fa-calendar"></i> Data Jadwal</a>
 				<a href="{{ route('admin.rentals.index') }}" class="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-blue-50 {{ request()->routeIs('admin.rentals.*') ? 'bg-blue-100 text-blue-900 font-semibold' : 'text-gray-700' }}"><i class="fa-solid fa-clipboard-list"></i> Detail Sewa</a>
@@ -33,9 +34,9 @@
 				<a href="{{ route('gedung.create') }}" class="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-blue-50 {{ request()->routeIs('gedung.create') ? 'bg-blue-100 text-blue-900 font-semibold' : 'text-gray-700' }}"><i class="fa-solid fa-plus"></i> Tambah Gedung</a>
 				<a href="{{ route('fasilitas.index') }}" class="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-blue-50 {{ request()->routeIs('fasilitas.*') ? 'bg-blue-100 text-blue-900 font-semibold' : 'text-gray-700' }}"><i class="fa-solid fa-boxes-stacked"></i> Fasilitas</a>
 				<a href="{{ route('fasilitas.create') }}" class="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-blue-50 {{ request()->routeIs('fasilitas.create') ? 'bg-blue-100 text-blue-900 font-semibold' : 'text-gray-700' }}"><i class="fa-solid fa-plus"></i> Tambah Fasilitas</a>
-				<form method="POST" action="{{ route('auth.logout') }}" class="mt-4 px-3">
+				<form method="POST" action="{{ route('auth.logout') }}" class="mt-4 px-3" id="admin-logout-form">
 					@csrf
-					<button class="w-full flex items-center gap-3 px-3 py-2 rounded-md text-red-600 hover:bg-red-50"><i class="fa-solid fa-arrow-right-from-bracket"></i> Logout</button>
+					<button type="button" onclick="if(confirm('Anda yakin ingin logout dari akun admin?')){ document.getElementById('admin-logout-form').submit(); }" class="w-full flex items-center gap-3 px-3 py-2 rounded-md text-red-600 hover:bg-red-50"><i class="fa-solid fa-arrow-right-from-bracket"></i> Logout</button>
 				</form>
 			</nav>
 		</aside>
@@ -53,17 +54,25 @@
 						</form>
 					</div>
 					@php
-						$avatarUrl = auth()->user()->profile_photo_url ?? asset('img/default-avatar.png');
+						// Prefer user's uploaded profile photo, otherwise show an admin-specific default avatar
+						if (!empty(auth()->user()->profile_photo_url)) {
+							$avatarUrl = auth()->user()->profile_photo_url;
+						} else {
+							$avatarUrl = (auth()->user()->role === 'A') ? asset('img/admin-avatar.svg') : asset('img/default-avatar.png');
+						}
 					@endphp
 					<div class="flex items-center gap-3">
 						<div class="text-right">
 							<div class="text-sm font-semibold text-gray-800">{{ auth()->user()->name ?? 'Admin' }}</div>
 							<div class="text-xs text-gray-500">Administrator</div>
 						</div>
-						<img src="{{ $avatarUrl }}"
-							 class="w-9 h-9 rounded-full border object-cover"
-							 alt="avatar"
-							 onerror="this.src='{{ asset('img/default-avatar.png') }}'">
+						<a href="{{ route('profile') }}" title="Profil Saya">
+							<img src="{{ $avatarUrl }}"
+						 	 class="w-9 h-9 rounded-full border object-cover"
+						 	 alt="avatar"
+						 	 data-default-avatar="{{ asset('img/default-avatar.png') }}"
+						 	 onerror="this.src=this.dataset.defaultAvatar">
+						</a>
 					</div>
 				</div>
 			</header>
@@ -73,7 +82,36 @@
 			</main>
 		</div>
 	</div>
+
+	<!-- Flash toast for admin actions -->
+	<div id="admin-flash-toast" class="fixed top-6 right-6 z-50 hidden">
+		<div id="admin-flash-inner" class="max-w-sm bg-green-600 text-white px-4 py-3 rounded-lg shadow-lg"></div>
+	</div>
+
 	@stack('scripts')
+
+	<!-- flash data container (no inline blade in JS) -->
+	<div id="admin-flash-data" data-success="{{ e(session('success')) }}" data-error="{{ e(session('error')) }}"></div>
+
+	<script>
+		(function(){
+			var toast = document.getElementById('admin-flash-toast');
+			var inner = document.getElementById('admin-flash-inner');
+			var data = document.getElementById('admin-flash-data');
+			if (!data) return;
+			var msg = data.dataset.success || data.dataset.error || '';
+			var isError = !!data.dataset.error && !data.dataset.success;
+			if (!msg) return;
+			inner.textContent = msg;
+			if (isError) {
+				inner.classList.remove('bg-green-600');
+				inner.classList.add('bg-red-600');
+			}
+			toast.classList.remove('hidden');
+			setTimeout(function(){ toast.classList.add('opacity-100'); }, 10);
+			setTimeout(function(){ toast.classList.add('hidden'); }, 4000);
+		})();
+	</script>
 </body>
 <html>
 

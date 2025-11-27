@@ -18,6 +18,7 @@
         <thead class="bg-gray-100 text-left">
             <tr>
                 <th class="p-3">No</th>
+                <th class="p-3">Gambar</th>
                 <th class="p-3">Nama</th>
                 <th class="p-3">Harga</th>
                 <th class="p-3">Stok</th>
@@ -29,6 +30,13 @@
             @forelse($items as $i => $it)
             <tr class="border-t">
                 <td class="p-3">{{ $i+1 }}</td>
+                <td class="p-3">
+                    @if($it->image)
+                        <img src="{{ asset('storage/'.$it->image) }}" alt="{{ $it->nama }}" class="w-16 h-12 object-cover rounded">
+                    @else
+                        <span class="text-xs text-gray-400">-</span>
+                    @endif
+                </td>
                 <td class="p-3 font-semibold">{{ $it->nama }}</td>
                 <td class="p-3">Rp {{ number_format($it->harga ?? 0) }}</td>
                 <td class="p-3">{{ $it->stok }}</td>

@@ -16,6 +16,7 @@ class Fasilitas extends Model
         'deskripsi',
         'stok',
         'harga',
+        'image',
     ];
 
     public $incrementing = false;
