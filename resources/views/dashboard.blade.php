@@ -101,7 +101,6 @@ $fasilitasList = [
     ['nama' => 'Lampu', 'harga' => 50000],
 ];
 
-// Ambil 5 fasilitas pertama saja
 $fasilitasList = array_slice($fasilitasList, 0, 6);
 @endphp
 

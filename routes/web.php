@@ -112,6 +112,7 @@ Route::middleware(['auth', 'role:A'])->prefix('admin')->name('admin.')->group(fu
     Route::post('/booking', [AdminController::class, 'bookingStore'])->name('booking.store');
     Route::get('/booking/{id}/edit', [AdminController::class, 'bookingEdit'])->name('booking.edit');
     Route::put('/booking/{id}', [AdminController::class, 'bookingUpdate'])->name('booking.update');
+    Route::delete('/booking/{id}', [AdminController::class, 'bookingDestroy'])->name('booking.destroy');
     Route::get('/booking/{id}/invoice', [AdminController::class, 'bookingInvoice'])->name('booking.invoice');
     
     // Payment Verification

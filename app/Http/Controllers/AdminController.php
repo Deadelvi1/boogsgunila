@@ -283,6 +283,27 @@ class AdminController extends Controller
 		return redirect()->route('admin.schedules.index')->with('success', 'Jadwal berhasil ditambahkan.');
 	}
 
+	public function bookingDestroy($id)
+	{
+		$booking = Booking::findOrFail($id);
+
+		// remove related fasilitas and payments if any
+		try {
+			$booking->bookingFasilitas()->delete();
+		} catch (\Exception $e) {
+			// ignore if relation missing
+		}
+		try {
+			Payment::where('booking_id', $id)->delete();
+		} catch (\Exception $e) {
+			// ignore
+		}
+
+		$booking->delete();
+
+		return redirect()->route('admin.schedules.index')->with('success', 'Jadwal berhasil dihapus.');
+	}
+
 	public function bookingInvoice($id)
 	{
 		$booking = Booking::with(['user', 'gedung', 'bookingFasilitas.fasilitas'])->findOrFail($id);
