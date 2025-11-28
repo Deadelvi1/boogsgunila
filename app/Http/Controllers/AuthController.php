@@ -56,10 +56,11 @@ class AuthController extends Controller
         ]);
 
         // Kirim OTP via email
-        Mail::raw("Kode OTP Anda adalah: $otp (berlaku 10 menit).", function ($message) use ($user) {
-            $message->to($user->email)
-                ->subject('Kode OTP Registrasi');
-        });
+       Mail::send('emails.otp', ['otp' => $otp, 'user' => $user], function ($message) use ($user) {
+    $message->to($user->email)
+            ->subject('Kode OTP Verifikasi Akun');
+});
+
 
         return redirect()->route('otp.verify.show', ['email' => $user->email]);
     }

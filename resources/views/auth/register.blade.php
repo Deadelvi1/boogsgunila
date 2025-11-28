@@ -1,44 +1,68 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="min-h-screen bg-gray-50 py-8">
-  <div class="max-w-md mx-auto bg-white p-6 rounded shadow">
-    <h1 class="text-xl font-bold mb-4">Register</h1>
-    <form method="POST" action="{{ route('auth.register') }}" class="space-y-4">
-      @csrf
-      @if($errors->any())
-        <div class="bg-red-100 text-red-700 p-3 rounded mb-4">
-          <ul class="list-disc list-inside">
-            @foreach($errors->all() as $error)
-              <li>{{ $error }}</li>
-            @endforeach
-          </ul>
-        </div>
-      @endif
+<div class="min-h-screen flex items-center justify-center bg-cover bg-center" 
+     style="background-image: url('{{ asset('img/GSGunila.jpg') }}')">
 
-      <div>
-        <label class="block text-sm font-medium">Nama</label>
-        <input type="text" name="name" class="mt-1 w-full border rounded px-3 py-2 @error('name') border-red-500 @enderror" value="{{ old('name') }}" required>
-        @error('name')<p class="text-red-600 text-sm mt-1">{{ $message }}</p>@enderror
-      </div>
-      <div>
-        <label class="block text-sm font-medium">Email</label>
-        <input type="email" name="email" class="mt-1 w-full border rounded px-3 py-2 @error('email') border-red-500 @enderror" value="{{ old('email') }}" required>
-        @error('email')<p class="text-red-600 text-sm mt-1">{{ $message }}</p>@enderror
-      </div>
-      <div>
-        <label class="block text-sm font-medium">Password</label>
-        <input type="password" name="password" class="mt-1 w-full border rounded px-3 py-2 @error('password') border-red-500 @enderror" required>
-        @error('password')<p class="text-red-600 text-sm mt-1">{{ $message }}</p>@enderror
-      </div>
-      <div>
-        <label class="block text-sm font-medium">Konfirmasi Password</label>
-        <input type="password" name="password_confirmation" class="mt-1 w-full border rounded px-3 py-2" required>
-      </div>
-      <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded">Daftar</button>
-    </form>
-  </div>
+    <!-- CARD REGISTER -->
+    <div class="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-md">
+        
+        <h1 class="text-2xl font-bold mb-6 text-center">Register</h1>
+
+        <form method="POST" action="{{ route('auth.register') }}" class="space-y-4">
+            @csrf
+
+            @if($errors->any())
+                <div class="bg-red-100 text-red-700 p-3 rounded mb-4">
+                    <ul class="list-disc list-inside">
+                        @foreach($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+
+            <!-- Nama -->
+            <div>
+                <label class="block text-sm font-medium">Nama</label>
+                <input type="text" name="name"
+                       class="mt-1 w-full border rounded px-3 py-2 @error('name') border-red-500 @enderror"
+                       value="{{ old('name') }}" required>
+            </div>
+
+            <!-- Email -->
+            <div>
+                <label class="block text-sm font-medium">Email</label>
+                <input type="email" name="email"
+                       class="mt-1 w-full border rounded px-3 py-2 @error('email') border-red-500 @enderror"
+                       value="{{ old('email') }}" required>
+            </div>
+
+            <!-- Password -->
+            <div>
+                <label class="block text-sm font-medium">Password</label>
+                <input type="password" name="password"
+                       class="mt-1 w-full border rounded px-3 py-2 @error('password') border-red-500 @enderror"
+                       required>
+            </div>
+
+            <!-- Password Confirmation -->
+            <div>
+                <label class="block text-sm font-medium">Konfirmasi Password</label>
+                <input type="password" name="password_confirmation"
+                       class="mt-1 w-full border rounded px-3 py-2"
+                       required>
+            </div>
+
+            <!-- Tombol -->
+            <button type="submit"
+                    class="w-full bg-blue-600 text-white py-2 rounded-lg font-semibold">
+                Daftar
+            </button>
+
+        </form>
+
+    </div>
+
 </div>
 @endsection
-
-
