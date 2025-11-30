@@ -76,6 +76,7 @@
                                         capacityInput.removeAttribute('max');
                                     }
                                 }
+                                recalcTotal();
                             });
                             
                             // Trigger on page load if value already selected
@@ -224,14 +225,26 @@
                 </div>
                 <div>
                     <label class="block text-sm font-medium mb-2">Fasilitas (opsional)</label>
+                    <!-- Stock validation error -->
+                    <div id="stockError" class="hidden mb-3 p-3 bg-red-100 border border-red-400 text-red-700 rounded text-sm"></div>
+                    
                     <div class="space-y-2">
                            @foreach($fasilitas as $f)
                             <div class="flex items-center gap-3">
                                 <input type="checkbox" 
                                     id="f_{{ $f->id }}" 
                                     data-harga="{{ $f->harga ?? 0 }}"
-                                    onchange="toggleFasilitas(this, {{ $loop->index }}); recalcTotal();">
-                                <label for="f_{{ $f->id }}" class="w-48">{{ $f->nama }} - Rp {{ number_format($f->harga ?? 0, 0, ',', '.') }} <span class="text-xs text-gray-500">(Stok: {{ $f->stok }})</span></label>
+                                    data-stok="{{ $f->stok }}"
+                                    data-nama="{{ $f->nama }}"
+                                    onchange="toggleFasilitas(this, {{ $loop->index }}); recalcTotal();"
+                                    @if($f->stok <= 0) disabled @endif>
+                                <label for="f_{{ $f->id }}" class="w-48 flex-1">
+                                    {{ $f->nama }} - Rp {{ number_format($f->harga ?? 0, 0, ',', '.') }} 
+                                    <span class="text-xs text-gray-500">(Stok: {{ $f->stok }})</span>
+                                    @if($f->stok <= 0)
+                                        <span class="text-xs text-red-600 font-semibold ml-2">❌ Stok Kosong</span>
+                                    @endif
+                                </label>
                                 <input type="hidden" 
                                     name="fasilitas[{{ $loop->index }}][id]" 
                                     value="{{ $f->id }}" 
@@ -253,6 +266,14 @@
                             function toggleFasilitas(checkbox, index) {
                                 const idField = document.getElementById('fasilitas_id_' + index);
                                 const jumlahField = document.getElementById('fasilitas_jumlah_' + index);
+                                const stok = parseInt(checkbox.dataset.stok || 0);
+                                
+                                // Check if stock is empty
+                                if (stok <= 0) {
+                                    checkbox.checked = false;
+                                    showStockError(checkbox.dataset.nama + ' tidak memiliki stok');
+                                    return;
+                                }
                                 
                                 if (checkbox.checked) {
                                     idField.disabled = false;
@@ -260,6 +281,40 @@
                                 } else {
                                     idField.disabled = true;
                                     jumlahField.disabled = true;
+                                }
+                                
+                                // Clear error when all stocks are ok
+                                validateAllStocks();
+                            }
+                            
+                            function showStockError(message) {
+                                const errorEl = document.getElementById('stockError');
+                                errorEl.textContent = '⚠️ ' + message;
+                                errorEl.classList.remove('hidden');
+                            }
+                            
+                            function hideStockError() {
+                                const errorEl = document.getElementById('stockError');
+                                errorEl.classList.add('hidden');
+                            }
+                            
+                            function validateAllStocks() {
+                                const checkboxes = document.querySelectorAll('input[type="checkbox"][data-stok]');
+                                let hasError = false;
+                                
+                                checkboxes.forEach(cb => {
+                                    if (cb.checked) {
+                                        const stok = parseInt(cb.dataset.stok || 0);
+                                        if (stok <= 0) {
+                                            hasError = true;
+                                            showStockError(cb.dataset.nama + ' tidak memiliki stok');
+                                            return;
+                                        }
+                                    }
+                                });
+                                
+                                if (!hasError) {
+                                    hideStockError();
                                 }
                             }
                         </script>
@@ -292,7 +347,7 @@
         function recalcTotal() {
             const gedungSelect = document.getElementById('gedung_id');
             let gedungPrice = 0;
-            if (gedungSelect && gedungSelect.options[gedungSelect.selectedIndex]) {
+            if (gedungSelect && gedungSelect.options && gedungSelect.options[gedungSelect.selectedIndex]) {
                 gedungPrice = parseInt(gedungSelect.options[gedungSelect.selectedIndex].dataset.harga || 0);
             }
 

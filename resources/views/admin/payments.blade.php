@@ -175,11 +175,6 @@
 					</button>
 				</form>
 			@endif
-
-			<!-- Link ke Jadwal -->
-			<a href="{{ route('admin.booking.edit', $p->booking->id) }}" class="px-4 py-2 border border-blue-600 text-blue-600 hover:bg-blue-50 rounded font-medium">
-				📝 Edit Jadwal
-			</a>
 		</div>
 
 		<!-- Info Status Booking -->

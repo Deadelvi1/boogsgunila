@@ -124,34 +124,41 @@
         <div>
             <label class="block text-sm font-medium">Fasilitas (opsional)</label>
             <div class="mt-2 space-y-2">
-                @foreach($fasilitas as $idx => $f)
+                @php $idx = 0; @endphp
+                @foreach($fasilitas as $f)
                     @php
                         $bf = $item->bookingFasilitas->firstWhere('fasilitas_id', $f->id);
                     @endphp
                     <div class="flex items-center gap-3">
-                        <input type="checkbox" id="f_{{ $f->id }}" value="1" {{ $bf ? 'checked' : '' }} onchange="toggleFasilitasInput(this, {{ $idx }})">
-                        <label for="f_{{ $f->id }}" class="flex-1 text-sm font-medium cursor-pointer">{{ $f->nama }} (Rp {{ number_format($f->harga ?? 0) }})</label>
-                        <input type="hidden" name="fasilitas_id_{{ $idx }}" value="{{ $f->id }}" {{ !$bf ? 'disabled' : '' }}>
-                        <input type="number" name="fasilitas_qty_{{ $idx }}" min="1" value="{{ $bf->jumlah ?? 1 }}" class="w-20 border rounded px-2 py-1" {{ !$bf ? 'disabled' : '' }}>
+                        <input type="checkbox" id="f_{{ $f->id }}" 
+                            class="facility-check" 
+                            data-idx="{{ $idx }}"
+                            data-facility-id="{{ $f->id }}"
+                            {{ $bf ? 'checked' : '' }} 
+                            onchange="toggleFacility(this)">
+                        <label for="f_{{ $f->id }}" class="flex-1 text-sm font-medium cursor-pointer">
+                            {{ $f->nama }} (Rp {{ number_format($f->harga ?? 0) }})
+                        </label>
+                        <input type="hidden" name="fasilitas[{{ $idx }}][id]" value="{{ $f->id }}" {{ $bf ? '' : 'disabled' }}>
+                        <input type="number" name="fasilitas[{{ $idx }}][jumlah]" min="1" value="{{ $bf->jumlah ?? 1 }}" class="w-20 border rounded px-2 py-1" {{ $bf ? '' : 'disabled' }}>
                     </div>
+                    @php $idx++; @endphp
                 @endforeach
             </div>
         </div>
 
         <script>
-            function toggleFasilitasInput(checkbox, idx) {
-                const idInput = document.querySelector('input[name="fasilitas_id_' + idx + '"]');
-                const qtyInput = document.querySelector('input[name="fasilitas_qty_' + idx + '"]');
+            function toggleFacility(checkbox) {
+                const idx = checkbox.getAttribute('data-idx');
+                const hiddenInput = document.querySelector(`input[name="fasilitas[${idx}][id]"]`);
+                const qtyInput = document.querySelector(`input[name="fasilitas[${idx}][jumlah]"]`);
+                
                 if (checkbox.checked) {
-                    idInput.disabled = false;
+                    hiddenInput.disabled = false;
                     qtyInput.disabled = false;
-                    idInput.name = 'fasilitas[' + idx + '][id]';
-                    qtyInput.name = 'fasilitas[' + idx + '][jumlah]';
                 } else {
-                    idInput.disabled = true;
+                    hiddenInput.disabled = true;
                     qtyInput.disabled = true;
-                    idInput.name = 'fasilitas_id_' + idx;
-                    qtyInput.name = 'fasilitas_qty_' + idx;
                 }
             }
         </script>

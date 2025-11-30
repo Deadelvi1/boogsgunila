@@ -83,7 +83,7 @@
                         <select name="payment_account_id" id="paymentAccount" class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500">
                             <option value="">-- Pilih Rekening --</option>
                             @foreach($paymentAccounts as $acc)
-                                <option value="{{ $acc->id }}">
+                                <option value="{{ $acc->id }}" data-type="{{ $acc->type }}">
                                     {{ $acc->name }} - {{ $acc->account_number }} ({{ $acc->type }})
                                 </option>
                             @endforeach
@@ -164,13 +164,46 @@ function updatePaymentUI() {
     const selectedMethod = document.querySelector('input[name="selected_method"]:checked').value;
     const accountSection = document.getElementById('accountSection');
     const proofSection = document.getElementById('proofSection');
-
+    const paymentAccountSelect = document.getElementById('paymentAccount');
+    
+    // Determine which account types to show based on payment method
+    let accountTypeToShow = null;
+    
     if (selectedMethod === 'bayar-ditempat') {
         accountSection.classList.add('hidden');
         proofSection.classList.add('hidden');
-    } else {
+    } else if (selectedMethod === 'transfer-bank') {
         accountSection.classList.remove('hidden');
         proofSection.classList.remove('hidden');
+        accountTypeToShow = 'transfer-bank';
+    } else if (selectedMethod === 'e-wallet') {
+        accountSection.classList.remove('hidden');
+        proofSection.classList.remove('hidden');
+        accountTypeToShow = 'e-wallet';
+    }
+    
+    // Filter account options based on type
+    const allOptions = paymentAccountSelect.querySelectorAll('option');
+    allOptions.forEach(option => {
+        if (option.value === '') {
+            // Always show placeholder
+            option.style.display = 'block';
+        } else if (accountTypeToShow) {
+            const optionType = option.dataset.type || '';
+            if (optionType.toLowerCase() === accountTypeToShow.toLowerCase()) {
+                option.style.display = 'block';
+            } else {
+                option.style.display = 'none';
+            }
+        }
+    });
+    
+    // Reset the select value if current selection is hidden
+    if (paymentAccountSelect.value) {
+        const selectedOption = paymentAccountSelect.querySelector(`option[value="${paymentAccountSelect.value}"]`);
+        if (selectedOption && selectedOption.style.display === 'none') {
+            paymentAccountSelect.value = '';
+        }
     }
 }
 

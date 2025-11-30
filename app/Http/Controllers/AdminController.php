@@ -73,7 +73,7 @@ class AdminController extends Controller
 			'phone' => 'nullable|string|max:30',
 		]);
 
-		\App\Models\User::create([
+		$user = \App\Models\User::create([
 			'name' => $request->name,
 			'email' => $request->email,
 			'password' => \Illuminate\Support\Facades\Hash::make($request->password),
@@ -82,7 +82,7 @@ class AdminController extends Controller
 			'email_verified_at' => now(),
 		]);
 
-		return redirect()->route('admin.users.index')->with('success', 'Pengguna berhasil ditambahkan.');
+		return redirect()->route('admin.users.index')->with('success', 'Pengguna berhasil ditambahkan. User dapat langsung login tanpa OTP.');
 	}
 
 	public function usersEdit($id)
@@ -199,12 +199,15 @@ class AdminController extends Controller
 			'phone' => 'required|string|max:30',
 			'date' => 'required|date',
 			'end_date' => 'nullable|date|after_or_equal:date',
-			'start_time' => 'required|date_format:H:i',
-			'end_time' => 'required|date_format:H:i|after:start_time',
+			'start_time' => 'required|regex:/^\d{1,2}:\d{2}(:\d{2})?$/',
+			'end_time' => 'required|regex:/^\d{1,2}:\d{2}(:\d{2})?$/',
 			'fasilitas' => 'nullable|array',
 			'fasilitas.*.id' => 'required_with:fasilitas|exists:fasilitas,id',
 			'fasilitas.*.jumlah' => 'required_with:fasilitas|integer|min:1',
 			'status' => 'required|in:1,2,3,4',
+		], [
+			'start_time.regex' => 'Jam mulai tidak valid',
+			'end_time.regex' => 'Jam selesai tidak valid',
 		]);
 
 		$booking = Booking::findOrFail($id);
@@ -221,6 +224,26 @@ class AdminController extends Controller
 		$oldStatus = $booking->status;
 
 		$booking->update($updateData);
+
+		// Sinkronisasi status pembayaran jika booking status berubah
+		if (isset($updateData['status']) && $oldStatus !== $updateData['status']) {
+			$newBookingStatus = $updateData['status'];
+			
+			// Jika booking di-approve (status 2), mark payment sebagai verified
+			if ($newBookingStatus === '2') {
+				$payment = \App\Models\Payment::where('booking_id', $booking->id)->first();
+				if ($payment) {
+					$payment->update(['status' => '2']); // 2 = verified
+				}
+			}
+			// Jika booking di-reject (status 3), mark payment sebagai rejected
+			else if ($newBookingStatus === '3') {
+				$payment = \App\Models\Payment::where('booking_id', $booking->id)->first();
+				if ($payment) {
+					$payment->update(['status' => '3']); // 3 = rejected
+				}
+			}
+		}
 
 		// Prepare friendly message if status changed
 		$statusLabels = ['1' => 'Menunggu', '2' => 'Disetujui', '3' => 'Ditolak', '4' => 'Selesai'];
@@ -415,7 +438,77 @@ class AdminController extends Controller
 			], 500);
 		}
 	}
+
+	// ========== PAYMENT ACCOUNT MANAGEMENT ==========
+	
+	public function paymentAccountsIndex()
+	{
+		$accounts = \App\Models\PaymentAccount::orderBy('type')->orderBy('name')->get();
+		return view('admin.payment_accounts.index', [
+			'title' => 'Kelola Rekening Pembayaran',
+			'accounts' => $accounts,
+		]);
+	}
+
+	public function paymentAccountsCreate()
+	{
+		return view('admin.payment_accounts.create', [
+			'title' => 'Tambah Rekening Pembayaran',
+		]);
+	}
+
+	public function paymentAccountsStore(Request $request)
+	{
+		$data = $request->validate([
+			'type' => 'required|in:bayar-ditempat,transfer-bank,e-wallet',
+			'name' => 'required|string|max:255',
+			'account_number' => 'required|string|max:255',
+			'account_name' => 'required|string|max:255',
+			'description' => 'nullable|string|max:500',
+			'is_active' => 'boolean',
+		]);
+
+		\App\Models\PaymentAccount::create($data);
+
+		return redirect()->route('admin.payment_accounts.index')
+			->with('success', 'Rekening pembayaran berhasil ditambahkan.');
+	}
+
+	public function paymentAccountsEdit($id)
+	{
+		$account = \App\Models\PaymentAccount::findOrFail($id);
+		return view('admin.payment_accounts.edit', [
+			'title' => 'Edit Rekening Pembayaran',
+			'account' => $account,
+		]);
+	}
+
+	public function paymentAccountsUpdate(Request $request, $id)
+	{
+		$account = \App\Models\PaymentAccount::findOrFail($id);
+		
+		$data = $request->validate([
+			'type' => 'required|in:bayar-ditempat,transfer-bank,e-wallet',
+			'name' => 'required|string|max:255',
+			'account_number' => 'required|string|max:255',
+			'account_name' => 'required|string|max:255',
+			'description' => 'nullable|string|max:500',
+			'is_active' => 'boolean',
+		]);
+
+		$account->update($data);
+
+		return redirect()->route('admin.payment_accounts.index')
+			->with('success', 'Rekening pembayaran berhasil diperbarui.');
+	}
+
+	public function paymentAccountsDestroy($id)
+	{
+		$account = \App\Models\PaymentAccount::findOrFail($id);
+		$account->delete();
+
+		return redirect()->route('admin.payment_accounts.index')
+			->with('success', 'Rekening pembayaran berhasil dihapus.');
+	}
 }
-
-
 

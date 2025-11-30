@@ -21,7 +21,11 @@ class RedirectIfAuthenticated
 
         foreach ($guards as $guard) {
             if (Auth::guard($guard)->check()) {
-                return redirect()->route('booking.index');
+                $user = Auth::user();
+                if ($user->role === 'A') {
+                    return redirect()->route('admin.dashboard');
+                }
+                return redirect()->route('dashboard');
             }
         }
 

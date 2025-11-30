@@ -42,6 +42,40 @@ Route::middleware('guest')->group(function () {
     Route::post('/register', [AuthController::class, 'register'])->name('auth.register');
     Route::get('/login', [AuthController::class, 'showLogin'])->name('auth.login.form');
     Route::post('/login', [AuthController::class, 'login'])->name('auth.login');
+
+    // OTP verification
+    Route::get('/verify-otp', [AuthController::class, 'showOtpForm'])->name('auth.otp.form');
+    Route::post('/verify-otp', [AuthController::class, 'verifyOtp'])->name('auth.otp.verify');
+    Route::post('/otp/resend', [AuthController::class, 'resendOtp'])->name('auth.otp.resend');
+    
+    // DEBUG: Show OTP for testing (remove in production)
+    Route::get('/debug-otp/{email}', function ($email) {
+        if (app()->environment('production')) {
+            abort(403);
+        }
+        $otp = \App\Models\MahasiswaOtp::where('email', $email)
+            ->latest()
+            ->first();
+        
+        if (!$otp) {
+            return 'OTP tidak ditemukan untuk email: ' . $email;
+        }
+        
+        return "Email: {$otp->email}<br>OTP: <strong>{$otp->otp}</strong><br>Expired: {$otp->expired_at}";
+    })->name('debug.otp');
+    
+    // DEBUG: Manually verify user by email
+    Route::post('/debug-verify/{email}', function ($email) {
+        if (app()->environment('production')) {
+            abort(403);
+        }
+        $user = \App\Models\User::where('email', $email)->first();
+        if (!$user) {
+            return "User not found: $email";
+        }
+        $user->update(['email_verified_at' => now()]);
+        return "User $email verified! Now you can login.";
+    })->name('debug.verify');
 });
 
 // Authenticated routes (require login)
@@ -94,12 +128,6 @@ Route::middleware(['auth', 'role:A'])->prefix('admin')->name('admin.')->group(fu
     // Admin Schedules & Rentals
     Route::get('/schedules', [AdminController::class, 'schedulesIndex'])->name('schedules.index');
     Route::get('/rentals', [AdminController::class, 'rentalsIndex'])->name('rentals.index');
-
-    // API endpoints untuk dynamic updates di admin schedules
-    Route::prefix('api/booking')->name('api.booking.')->group(function () {
-        Route::get('/{id}/status', [AdminController::class, 'apiGetStatus'])->name('status');
-        Route::post('/{id}/delete', [AdminController::class, 'apiDeleteBooking'])->name('delete');
-    });
     
     // Admin Booking Actions
     Route::prefix('booking')->name('booking.')->group(function () {
@@ -115,6 +143,16 @@ Route::middleware(['auth', 'role:A'])->prefix('admin')->name('admin.')->group(fu
     Route::delete('/booking/{id}', [AdminController::class, 'bookingDestroy'])->name('booking.destroy');
     Route::get('/booking/{id}/invoice', [AdminController::class, 'bookingInvoice'])->name('booking.invoice');
     
+    // Payment Account Management (for admin to add/edit bank & e-wallet accounts)
+    Route::prefix('payment-accounts')->name('payment_accounts.')->group(function () {
+        Route::get('/', [AdminController::class, 'paymentAccountsIndex'])->name('index');
+        Route::get('/create', [AdminController::class, 'paymentAccountsCreate'])->name('create');
+        Route::post('/', [AdminController::class, 'paymentAccountsStore'])->name('store');
+        Route::get('/{id}/edit', [AdminController::class, 'paymentAccountsEdit'])->name('edit');
+        Route::put('/{id}', [AdminController::class, 'paymentAccountsUpdate'])->name('update');
+        Route::delete('/{id}', [AdminController::class, 'paymentAccountsDestroy'])->name('destroy');
+    });
+    
     // Payment Verification
     Route::prefix('payments')->name('payments.')->group(function () {
         Route::get('/', [PaymentController::class, 'adminIndex'])->name('index');
@@ -124,6 +162,24 @@ Route::middleware(['auth', 'role:A'])->prefix('admin')->name('admin.')->group(fu
 
 // Admin-only resource routes (Gedung & Fasilitas management)
 Route::middleware(['auth', 'role:A'])->group(function () {
+    // DEBUG: Check users email_verified_at status (remove in production)
+    Route::get('/debug-users', function () {
+        if (app()->environment('production')) {
+            abort(403);
+        }
+        $users = \App\Models\User::select('id', 'name', 'email', 'role', 'email_verified_at')->get();
+        return view('debug.users', ['users' => $users]);
+    })->name('debug.users');
+    
+    // DEBUG: Fix all users email_verified_at (set all to now)
+    Route::post('/debug-fix-users', function () {
+        if (app()->environment('production')) {
+            abort(403);
+        }
+        $count = \App\Models\User::whereNull('email_verified_at')->update(['email_verified_at' => now()]);
+        return "Fixed $count users. All users now have email_verified_at set.";
+    })->name('debug.fix.users');
+    
     // Gedung management
     Route::prefix('gedung')->name('gedung.')->group(function () {
         Route::get('/', [GedungController::class, 'index'])->name('index');

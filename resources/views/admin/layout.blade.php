@@ -31,6 +31,7 @@
 					<a href="{{ route('admin.users.index') }}" class="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-blue-50 {{ request()->routeIs('admin.users.*') ? 'bg-blue-100 text-blue-900 font-semibold' : 'text-gray-700' }}"><i class="fa-solid fa-users"></i> Pengguna</a>
 					<a href="{{ route('admin.schedules.index') }}" class="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-blue-50 {{ request()->routeIs('admin.schedules.*') ? 'bg-blue-100 text-blue-900 font-semibold' : 'text-gray-700' }}"><i class="fa-solid fa-calendar"></i> Jadwal</a>
 					<a href="{{ route('admin.payments.index') }}" class="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-blue-50 {{ request()->routeIs('admin.payments.*') ? 'bg-blue-100 text-blue-900 font-semibold' : 'text-gray-700' }}"><i class="fa-solid fa-file-invoice-dollar"></i> Pembayaran</a>
+					<a href="{{ route('admin.payment_accounts.index') }}" class="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-blue-50 {{ request()->routeIs('admin.payment_accounts.*') ? 'bg-blue-100 text-blue-900 font-semibold' : 'text-gray-700' }}"><i class="fa-solid fa-credit-card"></i> Metode Pembayaran</a>
 				</div>
 				
 				<!-- Asset Management Section -->

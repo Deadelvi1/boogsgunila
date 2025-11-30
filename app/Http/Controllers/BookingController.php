@@ -13,7 +13,7 @@ class BookingController extends Controller
 {
     public function __construct()
     {
-        $this->middleware(['auth', 'verified']);
+        $this->middleware(['auth']);
     }
     private const BASE_RATE_PER_HOUR = 500000; 
     public function index()
@@ -59,13 +59,37 @@ class BookingController extends Controller
             'phone' => 'required|string|max:30',
             'date' => 'required|date',
             'end_date' => 'nullable|date|after_or_equal:date',
-            'start_time' => 'required|date_format:H:i',
-            'end_time' => 'required|date_format:H:i|after:start_time',
+            'start_time' => 'required|regex:/^\d{1,2}:\d{2}(:\d{2})?$/',
+            'end_time' => 'required|regex:/^\d{1,2}:\d{2}(:\d{2})?$/',
             'proposal_file' => 'nullable|file|mimes:pdf,doc,docx',
             'fasilitas' => 'nullable|array',
             'fasilitas.*.id' => 'required|exists:fasilitas,id',
             'fasilitas.*.jumlah' => 'required|integer|min:1',
         ]);
+
+        // Validasi stock fasilitas
+        $fasilitasItems = $request->input('fasilitas', []);
+        foreach ($fasilitasItems as $item) {
+            $fasilitas = Fasilitas::find($item['id']);
+            if (!$fasilitas) {
+                continue;
+            }
+            
+            // Check if stock is empty or zero
+            if (!$fasilitas->stok || $fasilitas->stok <= 0) {
+                return back()
+                    ->withErrors(['fasilitas.*.id' => "Stok fasilitas '{$fasilitas->nama}' kosong, tidak dapat dipilih."])
+                    ->withInput();
+            }
+            
+            // Check if requested quantity exceeds stock
+            $jumlah = $item['jumlah'] ?? 1;
+            if ($jumlah > $fasilitas->stok) {
+                return back()
+                    ->withErrors(['fasilitas.*.jumlah' => "Jumlah '{$fasilitas->nama}' melebihi stok tersedia (stok: {$fasilitas->stok})."])
+                    ->withInput();
+            }
+        }
 
         // Cek bentrok jadwal pada gedung
         // Hanya booking dengan status 2 (disetujui) yang memblokir jadwal
@@ -249,8 +273,8 @@ class BookingController extends Controller
             'phone' => 'required|string|max:30',
             'date' => 'required|date',
             'end_date' => 'nullable|date|after_or_equal:date',
-            'start_time' => 'required|date_format:H:i',
-            'end_time' => 'required|date_format:H:i|after:start_time',
+            'start_time' => 'required|regex:/^\d{1,2}:\d{2}(:\d{2})?$/',
+            'end_time' => 'required|regex:/^\d{1,2}:\d{2}(:\d{2})?$/',
             'fasilitas' => 'nullable|array',
             'fasilitas.*.id' => 'required_with:fasilitas|exists:fasilitas,id',
             'fasilitas.*.jumlah' => 'required_with:fasilitas|integer|min:1',
