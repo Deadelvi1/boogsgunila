@@ -10,6 +10,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PublicController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\GoogleAuthController;
 
 /*
 |--------------------------------------------------------------------------
@@ -21,6 +22,9 @@ use App\Http\Controllers\AdminController;
 | be assigned to the "web" middleware group. Make something great!
 |
 */
+
+Route::get('auth/google', [GoogleAuthController::class, 'redirect'])->name('google.redirect');
+Route::get('auth/google/callback', [GoogleAuthController::class, 'callback'])->name('google.callback');
 
 // Public routes (accessible without authentication)
 Route::get('/home', [PublicController::class, 'home'])->name('home');
@@ -48,7 +52,7 @@ Route::middleware('guest')->group(function () {
     Route::get('/verify-otp', [AuthController::class, 'showOtpForm'])->name('auth.otp.form');
     Route::post('/verify-otp', [AuthController::class, 'verifyOtp'])->name('auth.otp.verify');
     Route::post('/otp/resend', [AuthController::class, 'resendOtp'])->name('auth.otp.resend');
-    
+
     // DEBUG: Show OTP for testing (remove in production)
     Route::get('/debug-otp/{email}', function ($email) {
         if (app()->environment('production')) {
@@ -57,14 +61,14 @@ Route::middleware('guest')->group(function () {
         $otp = \App\Models\MahasiswaOtp::where('email', $email)
             ->latest()
             ->first();
-        
+
         if (!$otp) {
             return 'OTP tidak ditemukan untuk email: ' . $email;
         }
-        
+
         return "Email: {$otp->email}<br>OTP: <strong>{$otp->otp}</strong><br>Expired: {$otp->expired_at}";
     })->name('debug.otp');
-    
+
     // DEBUG: Manually verify user by email
     Route::post('/debug-verify/{email}', function ($email) {
         if (app()->environment('production')) {
@@ -143,7 +147,7 @@ Route::middleware(['auth', 'role:A'])->prefix('admin')->name('admin.')->group(fu
     Route::put('/booking/{id}', [AdminController::class, 'bookingUpdate'])->name('booking.update');
     Route::delete('/booking/{id}', [AdminController::class, 'bookingDestroy'])->name('booking.destroy');
     Route::get('/booking/{id}/invoice', [AdminController::class, 'bookingInvoice'])->name('booking.invoice');
-    
+
     // Payment Account Management (for admin to add/edit bank & e-wallet accounts)
     Route::prefix('payment-accounts')->name('payment_accounts.')->group(function () {
         Route::get('/', [AdminController::class, 'paymentAccountsIndex'])->name('index');
@@ -153,7 +157,7 @@ Route::middleware(['auth', 'role:A'])->prefix('admin')->name('admin.')->group(fu
         Route::put('/{id}', [AdminController::class, 'paymentAccountsUpdate'])->name('update');
         Route::delete('/{id}', [AdminController::class, 'paymentAccountsDestroy'])->name('destroy');
     });
-    
+
     // Payment Verification
     Route::prefix('payments')->name('payments.')->group(function () {
         Route::get('/', [PaymentController::class, 'adminIndex'])->name('index');
@@ -171,7 +175,7 @@ Route::middleware(['auth', 'role:A'])->group(function () {
         $users = \App\Models\User::select('id', 'name', 'email', 'role', 'email_verified_at')->get();
         return view('debug.users', ['users' => $users]);
     })->name('debug.users');
-    
+
     // DEBUG: Fix all users email_verified_at (set all to now)
     Route::post('/debug-fix-users', function () {
         if (app()->environment('production')) {
@@ -180,7 +184,7 @@ Route::middleware(['auth', 'role:A'])->group(function () {
         $count = \App\Models\User::whereNull('email_verified_at')->update(['email_verified_at' => now()]);
         return "Fixed $count users. All users now have email_verified_at set.";
     })->name('debug.fix.users');
-    
+
     // Gedung management
     Route::prefix('gedung')->name('gedung.')->group(function () {
         Route::get('/', [GedungController::class, 'index'])->name('index');
