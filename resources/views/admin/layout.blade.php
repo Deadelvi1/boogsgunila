@@ -24,19 +24,27 @@
 			<nav class="px-3 py-4 space-y-1 text-sm">
 				<a href="{{ route('admin.dashboard') }}" class="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-blue-50 {{ request()->routeIs('admin.dashboard') ? 'bg-blue-100 text-blue-900 font-semibold' : 'text-gray-700' }}"><i class="fa-solid fa-gauge"></i> Dashboard</a>
 				<a href="{{ route('profile') }}" class="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-blue-50 {{ request()->routeIs('profile') ? 'bg-blue-100 text-blue-900 font-semibold' : 'text-gray-700' }}"><i class="fa-solid fa-user"></i> Profil Saya</a>
-				<a href="{{ route('admin.users.index') }}" class="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-blue-50 {{ request()->routeIs('admin.users.*') ? 'bg-blue-100 text-blue-900 font-semibold' : 'text-gray-700' }}"><i class="fa-solid fa-users"></i> Data Pengguna</a>
-				<a href="{{ route('admin.schedules.index') }}" class="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-blue-50 {{ request()->routeIs('admin.schedules.*') ? 'bg-blue-100 text-blue-900 font-semibold' : 'text-gray-700' }}"><i class="fa-solid fa-calendar"></i> Data Jadwal</a>
-				<a href="{{ route('admin.rentals.index') }}" class="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-blue-50 {{ request()->routeIs('admin.rentals.*') ? 'bg-blue-100 text-blue-900 font-semibold' : 'text-gray-700' }}"><i class="fa-solid fa-clipboard-list"></i> Detail Sewa</a>
-				<a href="{{ route('admin.payments.index') }}" class="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-blue-50 {{ request()->routeIs('admin.payments.*') ? 'bg-blue-100 text-blue-900 font-semibold' : 'text-gray-700' }}"><i class="fa-solid fa-file-invoice-dollar"></i> Verif Pembayaran</a>
-				<!-- Gedung & Fasilitas management -->
-				<div class="mt-2 border-t pt-2"></div>
-				<a href="{{ route('gedung.index') }}" class="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-blue-50 {{ request()->routeIs('gedung.*') ? 'bg-blue-100 text-blue-900 font-semibold' : 'text-gray-700' }}"><i class="fa-solid fa-building"></i> Gedung</a>
-				<a href="{{ route('gedung.create') }}" class="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-blue-50 {{ request()->routeIs('gedung.create') ? 'bg-blue-100 text-blue-900 font-semibold' : 'text-gray-700' }}"><i class="fa-solid fa-plus"></i> Tambah Gedung</a>
-				<a href="{{ route('fasilitas.index') }}" class="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-blue-50 {{ request()->routeIs('fasilitas.*') ? 'bg-blue-100 text-blue-900 font-semibold' : 'text-gray-700' }}"><i class="fa-solid fa-boxes-stacked"></i> Fasilitas</a>
-				<a href="{{ route('fasilitas.create') }}" class="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-blue-50 {{ request()->routeIs('fasilitas.create') ? 'bg-blue-100 text-blue-900 font-semibold' : 'text-gray-700' }}"><i class="fa-solid fa-plus"></i> Tambah Fasilitas</a>
+				
+				<!-- Management Section -->
+				<div class="mt-4 pt-3 border-t">
+					<div class="px-3 py-1 text-xs font-semibold text-gray-600 uppercase">Manajemen</div>
+					<a href="{{ route('admin.users.index') }}" class="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-blue-50 {{ request()->routeIs('admin.users.*') ? 'bg-blue-100 text-blue-900 font-semibold' : 'text-gray-700' }}"><i class="fa-solid fa-users"></i> Pengguna</a>
+					<a href="{{ route('admin.schedules.index') }}" class="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-blue-50 {{ request()->routeIs('admin.schedules.*') ? 'bg-blue-100 text-blue-900 font-semibold' : 'text-gray-700' }}"><i class="fa-solid fa-calendar"></i> Jadwal</a>
+					<a href="{{ route('admin.payments.index') }}" class="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-blue-50 {{ request()->routeIs('admin.payments.*') ? 'bg-blue-100 text-blue-900 font-semibold' : 'text-gray-700' }}"><i class="fa-solid fa-file-invoice-dollar"></i> Pembayaran</a>
+					<a href="{{ route('admin.payment_accounts.index') }}" class="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-blue-50 {{ request()->routeIs('admin.payment_accounts.*') ? 'bg-blue-100 text-blue-900 font-semibold' : 'text-gray-700' }}"><i class="fa-solid fa-credit-card"></i> Metode Pembayaran</a>
+				</div>
+				
+				<!-- Asset Management Section -->
+				<div class="mt-4 pt-3 border-t">
+					<div class="px-3 py-1 text-xs font-semibold text-gray-600 uppercase">Aset</div>
+					<a href="{{ route('gedung.index') }}" class="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-blue-50 {{ request()->routeIs('gedung.*') ? 'bg-blue-100 text-blue-900 font-semibold' : 'text-gray-700' }}"><i class="fa-solid fa-building"></i> Gedung</a>
+					<a href="{{ route('fasilitas.index') }}" class="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-blue-50 {{ request()->routeIs('fasilitas.*') ? 'bg-blue-100 text-blue-900 font-semibold' : 'text-gray-700' }}"><i class="fa-solid fa-boxes-stacked"></i> Fasilitas</a>
+				</div>
+				
+				<!-- Logout -->
 				<form method="POST" action="{{ route('auth.logout') }}" class="mt-4 px-3" id="admin-logout-form">
 					@csrf
-					<button type="button" onclick="if(confirm('Anda yakin ingin logout dari akun admin?')){ document.getElementById('admin-logout-form').submit(); }" class="w-full flex items-center gap-3 px-3 py-2 rounded-md text-red-600 hover:bg-red-50"><i class="fa-solid fa-arrow-right-from-bracket"></i> Logout</button>
+					<button type="button" onclick="if(confirm('Anda yakin ingin logout?')){ document.getElementById('admin-logout-form').submit(); }" class="w-full flex items-center gap-3 px-3 py-2 rounded-md text-red-600 hover:bg-red-50"><i class="fa-solid fa-arrow-right-from-bracket"></i> Logout</button>
 				</form>
 			</nav>
 		</aside>

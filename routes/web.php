@@ -47,18 +47,37 @@ Route::middleware('guest')->group(function () {
     // OTP verification
     Route::get('/verify-otp', [AuthController::class, 'showOtpForm'])->name('auth.otp.form');
     Route::post('/verify-otp', [AuthController::class, 'verifyOtp'])->name('auth.otp.verify');
+    Route::post('/otp/resend', [AuthController::class, 'resendOtp'])->name('auth.otp.resend');
+    
+    // DEBUG: Show OTP for testing (remove in production)
+    Route::get('/debug-otp/{email}', function ($email) {
+        if (app()->environment('production')) {
+            abort(403);
+        }
+        $otp = \App\Models\MahasiswaOtp::where('email', $email)
+            ->latest()
+            ->first();
+        
+        if (!$otp) {
+            return 'OTP tidak ditemukan untuk email: ' . $email;
+        }
+        
+        return "Email: {$otp->email}<br>OTP: <strong>{$otp->otp}</strong><br>Expired: {$otp->expired_at}";
+    })->name('debug.otp');
+    
+    // DEBUG: Manually verify user by email
+    Route::post('/debug-verify/{email}', function ($email) {
+        if (app()->environment('production')) {
+            abort(403);
+        }
+        $user = \App\Models\User::where('email', $email)->first();
+        if (!$user) {
+            return "User not found: $email";
+        }
+        $user->update(['email_verified_at' => now()]);
+        return "User $email verified! Now you can login.";
+    })->name('debug.verify');
 });
-
-
-// Halaman form OTP
-Route::get('/verify-otp', [AuthController::class, 'showOtpForm'])
-    ->name('otp.verify.show');
-
-// Proses verifikasi OTP
-Route::post('/verify-otp', [AuthController::class, 'verifyOtp'])
-    ->name('otp.verify');
-Route::get('/otp/verify', [AuthController::class, 'showOtpForm'])->name('otp.verify.show');
-Route::post('/otp/verify', [AuthController::class, 'verifyOtp'])->name('otp.verify');
 
 // Authenticated routes (require login)
 Route::middleware(['auth'])->group(function () {
@@ -84,6 +103,7 @@ Route::middleware(['auth'])->group(function () {
     // Payment management
     Route::prefix('payments')->name('payments.')->group(function () {
         Route::get('/', [PaymentController::class, 'index'])->name('index');
+        Route::get('/{id}/upload', [PaymentController::class, 'showUploadForm'])->name('upload.form');
         Route::post('/{id}/upload', [PaymentController::class, 'uploadProof'])->name('upload');
     });
 
@@ -112,15 +132,8 @@ Route::middleware(['auth', 'role:A'])->prefix('admin')->name('admin.')->group(fu
 
     // Admin Booking Actions
     Route::prefix('booking')->name('booking.')->group(function () {
-        Route::put('/{id}/approve', function ($id) {
-            \App\Models\Booking::where('id', $id)->update(['status' => '2']);
-            return redirect()->back()->with('success', 'Booking disetujui.');
-        })->name('approve');
-
-        Route::put('/{id}/reject', function ($id) {
-            \App\Models\Booking::where('id', $id)->update(['status' => '3']);
-            return redirect()->back()->with('success', 'Booking ditolak.');
-        })->name('reject');
+        Route::put('/{id}/approve', [AdminController::class, 'approveBooking'])->name('approve');
+        Route::put('/{id}/reject', [AdminController::class, 'rejectBooking'])->name('reject');
     });
 
     // Admin create booking (uses admin layout)
@@ -128,8 +141,19 @@ Route::middleware(['auth', 'role:A'])->prefix('admin')->name('admin.')->group(fu
     Route::post('/booking', [AdminController::class, 'bookingStore'])->name('booking.store');
     Route::get('/booking/{id}/edit', [AdminController::class, 'bookingEdit'])->name('booking.edit');
     Route::put('/booking/{id}', [AdminController::class, 'bookingUpdate'])->name('booking.update');
+    Route::delete('/booking/{id}', [AdminController::class, 'bookingDestroy'])->name('booking.destroy');
     Route::get('/booking/{id}/invoice', [AdminController::class, 'bookingInvoice'])->name('booking.invoice');
-
+    
+    // Payment Account Management (for admin to add/edit bank & e-wallet accounts)
+    Route::prefix('payment-accounts')->name('payment_accounts.')->group(function () {
+        Route::get('/', [AdminController::class, 'paymentAccountsIndex'])->name('index');
+        Route::get('/create', [AdminController::class, 'paymentAccountsCreate'])->name('create');
+        Route::post('/', [AdminController::class, 'paymentAccountsStore'])->name('store');
+        Route::get('/{id}/edit', [AdminController::class, 'paymentAccountsEdit'])->name('edit');
+        Route::put('/{id}', [AdminController::class, 'paymentAccountsUpdate'])->name('update');
+        Route::delete('/{id}', [AdminController::class, 'paymentAccountsDestroy'])->name('destroy');
+    });
+    
     // Payment Verification
     Route::prefix('payments')->name('payments.')->group(function () {
         Route::get('/', [PaymentController::class, 'adminIndex'])->name('index');
@@ -139,6 +163,24 @@ Route::middleware(['auth', 'role:A'])->prefix('admin')->name('admin.')->group(fu
 
 // Admin-only resource routes (Gedung & Fasilitas management)
 Route::middleware(['auth', 'role:A'])->group(function () {
+    // DEBUG: Check users email_verified_at status (remove in production)
+    Route::get('/debug-users', function () {
+        if (app()->environment('production')) {
+            abort(403);
+        }
+        $users = \App\Models\User::select('id', 'name', 'email', 'role', 'email_verified_at')->get();
+        return view('debug.users', ['users' => $users]);
+    })->name('debug.users');
+    
+    // DEBUG: Fix all users email_verified_at (set all to now)
+    Route::post('/debug-fix-users', function () {
+        if (app()->environment('production')) {
+            abort(403);
+        }
+        $count = \App\Models\User::whereNull('email_verified_at')->update(['email_verified_at' => now()]);
+        return "Fixed $count users. All users now have email_verified_at set.";
+    })->name('debug.fix.users');
+    
     // Gedung management
     Route::prefix('gedung')->name('gedung.')->group(function () {
         Route::get('/', [GedungController::class, 'index'])->name('index');

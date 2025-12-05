@@ -100,9 +100,18 @@
 					<a href="{{ route('admin.booking.edit', $b->id) }}" class="w-full text-center bg-indigo-600 hover:bg-indigo-700 text-white rounded py-2 text-sm">Edit</a>
 					<a href="{{ route('admin.booking.invoice', $b->id) }}" class="w-full text-center bg-blue-600 hover:bg-blue-700 text-white rounded py-2 text-sm">Lihat Invoice</a>
 					@if($b->status === '1')
-					<form action="{{ route('admin.booking.approve', $b->id) }}" method="POST">
+					<form action="{{ route('admin.booking.approve', $b->id) }}" method="POST" class="w-full" onsubmit="return confirm('Yakin ingin MENYETUJUI booking ini?')">
 						@csrf @method('PUT')
-						<button class="w-full bg-green-600 hover:bg-green-700 text-white rounded py-2 text-sm">Setujui</button>
+						<button class="w-full bg-green-600 hover:bg-green-700 text-white rounded py-2 text-sm">✓ Setujui</button>
+					</form>
+					<form action="{{ route('admin.booking.reject', $b->id) }}" method="POST" class="w-full" onsubmit="return confirm('Yakin ingin MENOLAK booking ini?')">
+						@csrf @method('PUT')
+						<button class="w-full bg-red-600 hover:bg-red-700 text-white rounded py-2 text-sm">✕ Tolak</button>
+					</form>
+					@elseif($b->status === '2')
+					<form action="{{ route('admin.booking.reject', $b->id) }}" method="POST" class="w-full" onsubmit="return confirm('Yakin ingin MEMBATALKAN (tolak) booking yang sudah disetujui ini?')">
+						@csrf @method('PUT')
+						<button class="w-full bg-orange-600 hover:bg-orange-700 text-white rounded py-2 text-sm">↻ Batalkan (Tolak)</button>
 					</form>
 					@endif
 				</div>

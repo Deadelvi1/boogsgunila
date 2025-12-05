@@ -45,20 +45,36 @@
 </section>
 
 <!-- Action Buttons Section -->
-<section class="bg-gray-50 py-8">
+<section class="bg-gradient-to-r from-blue-50 to-blue-100 py-8 border-b border-blue-200">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="grid md:grid-cols-3 gap-4">
-            <a href="{{ route('booking.index') }}" class="bg-blue-100 hover:bg-blue-200 text-blue-900 px-6 py-4 rounded-lg flex items-center gap-3 transition duration-300">
-                <i class="fas fa-calendar-alt text-xl"></i>
-                <span class="font-medium">Lihat Jadwal</span>
+        <div class="grid md:grid-cols-4 gap-4">
+            <a href="{{ route('booking.create') }}" class="bg-white hover:shadow-lg border-l-4 border-blue-600 px-6 py-4 rounded-lg flex items-center gap-3 transition duration-300">
+                <i class="fas fa-plus text-xl text-blue-600"></i>
+                <div class="text-left">
+                    <span class="font-medium text-gray-800 text-sm block">Buat Booking</span>
+                    <span class="text-xs text-gray-500">Mulai booking sekarang</span>
+                </div>
             </a>
-            <a href="#fasilitas" class="bg-blue-100 hover:bg-blue-200 text-blue-900 px-6 py-4 rounded-lg flex items-center gap-3 transition duration-300">
-                <i class="fas fa-user text-xl"></i>
-                <span class="font-medium">Fasilitas</span>
+            <a href="{{ route('booking.index') }}" class="bg-white hover:shadow-lg border-l-4 border-green-600 px-6 py-4 rounded-lg flex items-center gap-3 transition duration-300">
+                <i class="fas fa-calendar-alt text-xl text-green-600"></i>
+                <div class="text-left">
+                    <span class="font-medium text-gray-800 text-sm block">Booking Saya</span>
+                    <span class="text-xs text-gray-500">{{ $stats['total_bookings'] ?? 0 }} jadwal</span>
+                </div>
             </a>
-            <a href="#lokasi" class="bg-blue-100 hover:bg-blue-200 text-blue-900 px-6 py-4 rounded-lg flex items-center gap-3 transition duration-300">
-                <i class="fas fa-map-marker-alt text-xl"></i>
-                <span class="font-medium">Lokasi GSG</span>
+            <a href="{{ route('payments.index') }}" class="bg-white hover:shadow-lg border-l-4 border-yellow-600 px-6 py-4 rounded-lg flex items-center gap-3 transition duration-300">
+                <i class="fas fa-money-bill text-xl text-yellow-600"></i>
+                <div class="text-left">
+                    <span class="font-medium text-gray-800 text-sm block">Pembayaran</span>
+                    <span class="text-xs text-gray-500">Status pembayaran</span>
+                </div>
+            </a>
+            <a href="{{ route('public.jadwal') }}" class="bg-white hover:shadow-lg border-l-4 border-purple-600 px-6 py-4 rounded-lg flex items-center gap-3 transition duration-300">
+                <i class="fas fa-list text-xl text-purple-600"></i>
+                <div class="text-left">
+                    <span class="font-medium text-gray-800 text-sm block">Jadwal Publik</span>
+                    <span class="text-xs text-gray-500">Lihat jadwal lainnya</span>
+                </div>
             </a>
         </div>
     </div>
@@ -85,7 +101,6 @@ $fasilitasList = [
     ['nama' => 'Lampu', 'harga' => 50000],
 ];
 
-// Ambil 5 fasilitas pertama saja
 $fasilitasList = array_slice($fasilitasList, 0, 6);
 @endphp
 

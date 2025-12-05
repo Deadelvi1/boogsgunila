@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <title>Kode OTP Verifikasi - BooGSG</title>
@@ -38,7 +39,7 @@
             </h2>
 
             <p style="text-align:center; font-size:15px; color:#555; line-height:1.6;">
-                Hai <strong>{{ $user->name }}</strong>,  
+                Hai <strong>{{ $user->name }}</strong>,
                 berikut adalah kode OTP untuk memverifikasi akun Anda di <strong>BooGSG</strong>.
             </p>
 
@@ -59,7 +60,7 @@
             </div>
 
             <p style="font-size:14px; color:#444; line-height:1.6;">
-                Kode ini berlaku selama <strong>10 menit</strong>.  
+                Kode ini berlaku selama <strong>10 menit</strong>.
                 Jangan berikan kode ini kepada siapa pun, termasuk pihak yang mengaku dari BooGSG.
             </p>
 
@@ -78,4 +79,5 @@
     </div>
 
 </body>
+
 </html>

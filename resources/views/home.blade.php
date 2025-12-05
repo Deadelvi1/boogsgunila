@@ -121,8 +121,11 @@ $fasilitasList = array_slice($fasilitasList, 0, 6);
         <h2 class="text-3xl font-bold text-blue-900 mb-8">Penyewaan GSG</h2>
         <div class="grid md:grid-cols-4 gap-6">
             <!-- Wisuda Card -->
-            <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition duration-300">
+            <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition duration-300 relative">
                 <img src="{{ asset('img/wisuda.jpg') }}" alt="Wisuda" class="w-full h-48 object-cover" onerror="this.src='{{ asset('img/placeholder.jpg') }}'">
+                <div class="absolute top-2 right-2 bg-green-700 text-white px-3 py-1 rounded text-sm font-semibold">
+                    Rp {{ number_format(500000,0,',','.') }}/jam
+                </div>
                 <div class="p-4">
                     <h3 class="font-bold text-blue-900 text-lg mb-1">Wisuda</h3>
                     <p class="text-gray-600 text-sm">Wisuda Universitas lainnya</p>
@@ -130,8 +133,11 @@ $fasilitasList = array_slice($fasilitasList, 0, 6);
             </div>
             
             <!-- Konser Card -->
-            <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition duration-300">
+            <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition duration-300 relative">
                 <img src="{{ asset('img/konser.jpeg') }}" alt="Konser" class="w-full h-48 object-cover" onerror="this.src='{{ asset('img/placeholder.jpg') }}'">
+                <div class="absolute top-2 right-2 bg-green-700 text-white px-3 py-1 rounded text-sm font-semibold">
+                    Rp {{ number_format(500000,0,',','.') }}/jam
+                </div>
                 <div class="p-4">
                     <h3 class="font-bold text-blue-900 text-lg mb-1">Konser</h3>
                     <p class="text-gray-600 text-sm">Pengadaan Konser</p>
@@ -139,8 +145,11 @@ $fasilitasList = array_slice($fasilitasList, 0, 6);
             </div>
             
             <!-- Workshop Card -->
-            <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition duration-300">
+            <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition duration-300 relative">
                 <img src="{{ asset('img/workshop.jpg') }}" alt="Workshop" class="w-full h-48 object-cover" onerror="this.src='{{ asset('img/placeholder.jpg') }}'">
+                <div class="absolute top-2 right-2 bg-green-700 text-white px-3 py-1 rounded text-sm font-semibold">
+                    Rp {{ number_format(500000,0,',','.') }}/jam
+                </div>
                 <div class="p-4">
                     <h3 class="font-bold text-blue-900 text-lg mb-1">Workshop</h3>
                     <p class="text-gray-600 text-sm">Seminar ataupun Workshop</p>
@@ -148,8 +157,11 @@ $fasilitasList = array_slice($fasilitasList, 0, 6);
             </div>
             
             <!-- Acara Kampus Card -->
-            <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition duration-300">
+            <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition duration-300 relative">
                 <img src="{{ asset('img/acarahima.jpeg') }}" alt="Acara Kampus" class="w-full h-48 object-cover" onerror="this.src='{{ asset('img/placeholder.jpg') }}'">
+                <div class="absolute top-2 right-2 bg-green-700 text-white px-3 py-1 rounded text-sm font-semibold">
+                    Rp {{ number_format(500000,0,',','.') }}/jam
+                </div>
                 <div class="p-4">
                     <h3 class="font-bold text-blue-900 text-lg mb-1">Acara Kampus</h3>
                     <p class="text-gray-600 text-sm">Acara Hima, UKM, dan lainnya</p>

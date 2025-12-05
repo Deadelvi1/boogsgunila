@@ -29,8 +29,13 @@
             font-weight: 900;
         }
 
-        .brand-title span:first-child { color: #2563eb; }
-        .brand-title span:last-child { color: #111827; }
+        .brand-title span:first-child {
+            color: #2563eb;
+        }
+
+        .brand-title span:last-child {
+            color: #111827;
+        }
 
         .otp-container {
             display: flex;
@@ -63,23 +68,55 @@
             <span>Boo</span><span>GSG.</span>
         </div>
 
-        <h4 class="otp-title mb-3">Verifikasi Kode OTP</h4>
+        <h4 class="otp-title mb-3">Verifikasi Email Anda</h4>
 
-        @if(session('error'))
-        <div class="alert alert-danger">{{ session('error') }}</div>
-        @endif
-
+        <!-- Success Messages -->
         @if(session('success'))
-        <div class="alert alert-success">{{ session('success') }}</div>
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            ✓ {{ session('success') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
         @endif
 
-        <form method="POST" action="{{ route('otp.verify') }}">
+        @if(session('info'))
+        <div class="alert alert-info alert-dismissible fade show" role="alert">
+            ℹ️ {{ session('info') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        @endif
+
+        <!-- Error Messages -->
+        @if($errors->any())
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <strong>❌ Terjadi Kesalahan:</strong>
+            <ul class="mb-0 mt-2">
+                @foreach($errors->all() as $error)
+                <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        @endif
+
+        <!-- Missing Email Alert -->
+        @if(empty($email))
+        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+            <strong>⚠️ Error:</strong> Email tidak ditemukan. Silakan <a href="{{ route('auth.register') }}" class="alert-link">registrasi ulang</a>.
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        @else
+
+        <!-- OTP Input Form -->
+        <form method="POST" action="{{ route('auth.otp.verify') }}" id="otpForm">
             @csrf
 
-            <input type="hidden" name="email" value="{{ $email }}">
+            <!-- Hidden email field -->
+            <input type="hidden" name="email" value="{{ $email ?? '' }}">
             <input type="hidden" name="otp" id="otp-hidden">
 
-            <label class="form-label fw-bold">Masukkan Kode OTP</label>
+            <p class="text-muted small mb-3">Kami telah mengirim kode OTP ke: <strong>{{ $email ?? '-' }}</strong></p>
+
+            <label class="form-label fw-bold">Masukkan Kode OTP (6 digit)</label>
 
             <div class="otp-container mb-3">
                 <input maxlength="1" class="otp-input" type="text">
@@ -90,12 +127,30 @@
                 <input maxlength="1" class="otp-input" type="text">
             </div>
 
-            <button class="btn btn-primary btn-lg w-100 mt-2">Verifikasi</button>
+            <button type="submit" class="btn btn-primary btn-lg w-100 mt-2">Verifikasi</button>
         </form>
 
-        <p class="text-center mt-3 text-muted" style="font-size: 14px;">
-            Kode OTP berlaku selama <strong>10 menit</strong>.
-        </p>
+        <!-- Info & Resend Option -->
+        <div class="mt-4">
+            <p class="text-center text-muted small mb-2">
+                Kode OTP berlaku selama <strong>10 menit</strong>.
+            </p>
+
+            <hr class="my-3">
+
+            <p class="text-center text-muted small mb-2">Tidak menerima kode OTP?</p>
+
+            <form method="POST" action="{{ route('auth.otp.resend') }}" id="resendForm" class="d-none">
+                @csrf
+                <input type="hidden" name="email" value="{{ $email ?? '' }}">
+            </form>
+
+            <button type="button" class="btn btn-link btn-sm w-100" onclick="document.getElementById('resendForm').submit();">
+                Kirim Ulang Kode OTP
+            </button>
+        </div>
+
+        @endif
     </div>
 
     <script>

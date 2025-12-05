@@ -7,22 +7,23 @@ use App\Models\Gedung;
 
 class GedungController extends Controller
 {
-    public function showPublic()
+    public function __construct()
     {
-        return view('sewa.gedung', ['title' => 'Gedung Serba Guna']);
+        $this->middleware(['auth', 'role:A']);
     }
+
     public function index()
     {
         $data = [
-            'title' => 'List Gedung',
+            'title' => 'Gedung',
             'items' => Gedung::all(),
         ];
-        return view('list_gedung', $data);
+        return view('admin.gedung.index', $data);
     }
 
     public function create()
     {
-        return view('create_gedung', ['title' => 'Create Gedung']);
+        return view('admin.gedung.create', ['title' => 'Tambah Gedung']);
     }
 
     public function store(Request $request)
@@ -42,7 +43,7 @@ class GedungController extends Controller
     public function edit($id)
     {
         $item = Gedung::findOrFail($id);
-        return view('edit_gedung', ['title' => 'Edit Gedung', 'item' => $item]);
+        return view('admin.gedung.edit', ['title' => 'Edit Gedung', 'item' => $item]);
     }
 
     public function update(Request $request, $id)
