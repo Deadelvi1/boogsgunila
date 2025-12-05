@@ -59,10 +59,6 @@
 <body>
 
     <div class="otp-card">
-
-        <!-- GAMBAR DI ATAS (sesuai permintaan) -->
-        <img src="{{ asset('images/otp.png') }}" alt="OTP Image" style="width: 120px; margin-bottom: 15px;">
-
         <div class="brand-title mb-2">
             <span>Boo</span><span>GSG.</span>
         </div>
