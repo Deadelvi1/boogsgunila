@@ -7,6 +7,7 @@ use App\Models\Booking;
 use App\Models\Fasilitas;
 use App\Models\Gedung;
 use App\Models\Payment;
+use App\Models\User;
 
 class AdminController extends Controller
 {
@@ -121,14 +122,24 @@ class AdminController extends Controller
 
 	public function usersDestroy($id)
 	{
-		$user = \App\Models\User::findOrFail($id);
-		// Prevent deleting yourself
+		$user = User::findOrFail($id);
+
 		if ($user->id === auth()->id()) {
-			return redirect()->route('admin.users.index')->with('error', 'Tidak dapat menghapus akun sendiri.');
+			return redirect()->route('admin.users.index')
+				->with('error', 'Tidak dapat menghapus akun sendiri.');
 		}
+
+		if ($user->bookings()->count() > 0) {
+			return redirect()->route('admin.users.index')
+				->with('error', 'User tidak bisa dihapus karena masih memiliki booking.');
+		}
+
 		$user->delete();
-		return redirect()->route('admin.users.index')->with('success', 'Pengguna berhasil dihapus.');
+
+		return redirect()->route('admin.users.index')
+			->with('success', 'Pengguna berhasil dihapus.');
 	}
+
 
 	public function schedulesIndex()
 	{
