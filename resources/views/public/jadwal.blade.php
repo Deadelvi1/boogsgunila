@@ -25,7 +25,17 @@
 				<div class="bg-white rounded-xl shadow hover:shadow-lg transition overflow-hidden">
 					<img src="{{ asset('img/gsgjauh.jpg') }}" class="w-full h-40 object-cover" alt="banner">
 					<div class="p-4">
-						<p class="text-xs text-blue-700 font-semibold">{{ \Carbon\Carbon::parse($b->date)->format('d F Y') }}</p>
+						@php
+							$startDate = \Carbon\Carbon::parse($b->date);
+							$endDate = $b->end_date ? \Carbon\Carbon::parse($b->end_date) : null;
+						@endphp
+						<p class="text-xs text-blue-700 font-semibold">
+							@if($endDate && $endDate->ne($startDate))
+								Dari {{ $startDate->format('d F Y') }} sampai {{ $endDate->format('d F Y') }}
+							@else
+								{{ $startDate->format('d F Y') }}
+							@endif
+						</p>
 						<h3 class="font-bold text-blue-900">{{ $b->event_name }}</h3>
 						<p class="text-sm text-gray-600">{{ ucfirst($b->event_type) }} • {{ $b->start_time }} - {{ $b->end_time }}</p>
 					</div>

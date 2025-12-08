@@ -46,7 +46,17 @@
 					<div class="p-4">
 						<h3 class="font-bold text-blue-900 text-lg">{{ $gedungName }}</h3>
 						<p class="text-sm text-gray-600 mb-2">{{ $booking->event_name ?? 'Acara' }}</p>
-						<p class="text-xs text-gray-500 mb-3">📅 {{ \Carbon\Carbon::parse($booking->date)->format('d M Y') }}</p>
+						@php
+							$start = \Carbon\Carbon::parse($booking->date);
+							$end = $booking->end_date ? \Carbon\Carbon::parse($booking->end_date) : null;
+						@endphp
+						<p class="text-xs text-gray-500 mb-3">📅 
+							@if($end && $end->ne($start))
+								Dari {{ $start->format('d M Y') }} sampai {{ $end->format('d M Y') }}
+							@else
+								{{ $start->format('d M Y') }}
+							@endif
+						</p>
 						
 						<div class="mb-3 pb-3 border-b">
 							<p class="text-sm text-gray-600 mb-1">Total Pembayaran</p>

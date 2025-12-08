@@ -25,7 +25,17 @@
                     </div>
                     <div class="flex justify-between py-2 border-b">
                         <span class="text-gray-600">Tanggal:</span>
-                        <span>{{ \Carbon\Carbon::parse($booking->date)->format('d M Y') }}@if($booking->end_date && $booking->end_date !== $booking->date) - {{ \Carbon\Carbon::parse($booking->end_date)->format('d M Y') }}@endif</span>
+                        @php
+                            $start = \Carbon\Carbon::parse($booking->date);
+                            $end = $booking->end_date ? \Carbon\Carbon::parse($booking->end_date) : null;
+                        @endphp
+                        <span>
+                            @if($end && $end->ne($start))
+                                Dari {{ $start->format('d M Y') }} sampai {{ $end->format('d M Y') }}
+                            @else
+                                {{ $start->format('d M Y') }}
+                            @endif
+                        </span>
                     </div>
                     <div class="flex justify-between py-2">
                         <span class="text-gray-600">Total Pembayaran:</span>

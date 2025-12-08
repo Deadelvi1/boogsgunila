@@ -37,8 +37,17 @@
 			<div>
 				<div class="text-xs text-gray-500 uppercase font-semibold mb-2">Informasi Acara</div>
 				<div class="space-y-2 text-sm">
-					<div><strong>Tanggal:</strong> {{ $p->booking->date }}</div>
-					<div><strong>Tanggal Selesai:</strong> {{ $p->booking->end_date ?? $p->booking->date }}</div>
+					@php
+						$start = \Carbon\Carbon::parse($p->booking->date);
+						$end = $p->booking->end_date ? \Carbon\Carbon::parse($p->booking->end_date) : null;
+					@endphp
+					<div><strong>Tanggal:</strong>
+						@if($end && $end->ne($start))
+							Dari {{ $start->format('d M Y') }} sampai {{ $end->format('d M Y') }}
+						@else
+							{{ $start->format('d M Y') }}
+						@endif
+					</div>
 					<div><strong>Jam:</strong> {{ $p->booking->start_time }} - {{ $p->booking->end_time }}</div>
 					<div><strong>Kapasitas:</strong> {{ $p->booking->capacity }} orang</div>
 					<div><strong>Jenis:</strong> {{ $p->booking->event_type }}</div>

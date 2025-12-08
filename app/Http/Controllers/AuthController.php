@@ -57,19 +57,10 @@ class AuthController extends Controller
                 'email'    => $data['email'],
                 'password' => bcrypt($data['password']),
                 'role'     => 'U',
+                // Set a consistent default avatar for all new users
+                'profile_photo_url' => asset('img/admin-avatar.svg'),
                 // email_verified_at is NULL - user must verify via OTP
             ]);
-
-            // Copy default profile fields from an admin user if available, otherwise use default admin avatar
-            $adminTemplate = User::where('role', 'A')->first();
-            if ($adminTemplate) {
-                $user->update([
-                    'phone' => $adminTemplate->phone ?? $user->phone,
-                    'profile_photo_url' => $adminTemplate->profile_photo_url ?? asset('img/admin-avatar.svg'),
-                ]);
-            } else {
-                $user->update(['profile_photo_url' => asset('img/admin-avatar.svg')]);
-            }
 
             // Generate OTP
             $otp = rand(100000, 999999);
@@ -95,18 +86,9 @@ class AuthController extends Controller
                 'password' => bcrypt($data['password']),
                 'role'     => 'U',
                 'email_verified_at' => now(), // Auto-verify
+                // Set a consistent default avatar for all new users
+                'profile_photo_url' => asset('img/admin-avatar.svg'),
             ]);
-
-            // Copy default profile fields from an admin user if available, otherwise use default admin avatar
-            $adminTemplate = User::where('role', 'A')->first();
-            if ($adminTemplate) {
-                $user->update([
-                    'phone' => $adminTemplate->phone ?? $user->phone,
-                    'profile_photo_url' => $adminTemplate->profile_photo_url ?? asset('img/admin-avatar.svg'),
-                ]);
-            } else {
-                $user->update(['profile_photo_url' => asset('img/admin-avatar.svg')]);
-            }
 
             // Login user langsung setelah register
             Auth::login($user);

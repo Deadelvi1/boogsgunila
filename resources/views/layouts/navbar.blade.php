@@ -70,10 +70,20 @@
                                 id="user-menu-button" 
                                 aria-expanded="false" 
                                 aria-haspopup="true">
-                            <img src="{{ auth()->user()->profile_photo_url ?? asset('img/dea.png') }}" 
+                            @php
+                                $user = auth()->user();
+                                $defaultAvatar = asset('img/admin-avatar.svg');
+                                if ($user && $user->profile_photo_url) {
+                                    $ts = $user->updated_at ? $user->updated_at->timestamp : time();
+                                    $avatarSrc = $user->profile_photo_url . '?v=' . $ts;
+                                } else {
+                                    $avatarSrc = $defaultAvatar;
+                                }
+                            @endphp
+                            <img src="{{ $avatarSrc }}" 
                                  alt="{{ auth()->user()->name }}" 
                                  class="h-8 w-8 rounded-full border-2 border-gray-300 object-cover" 
-                                 onerror="this.src='{{ asset('img/default-avatar.png') }}'">
+                                 onerror="this.src='{{ $defaultAvatar }}'">
                             <span class="text-sm font-medium">{{ auth()->user()->name }}</span>
                             <svg class="w-4 h-4" :class="{'rotate-180': open}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>

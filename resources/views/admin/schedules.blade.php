@@ -33,8 +33,16 @@
 
                 {{-- TANGGAL --}}
                 <td class="py-4 px-3 text-gray-700">
+                    @php
+                        $startDate = \Carbon\Carbon::parse($item->date);
+                        $endDate = $item->end_date ? \Carbon\Carbon::parse($item->end_date) : null;
+                    @endphp
                     <div class="font-semibold">
-                        {{ \Carbon\Carbon::parse($item->date)->format('d M Y') }}
+                        @if($endDate && $endDate->ne($startDate))
+                            Dari {{ $startDate->format('d M Y') }} sampai {{ $endDate->format('d M Y') }}
+                        @else
+                            {{ $startDate->format('d M Y') }}
+                        @endif
                     </div>
                     <div class="text-xs text-gray-500">
                         {{ \Carbon\Carbon::parse($item->start_time)->format('H:i') }} -
