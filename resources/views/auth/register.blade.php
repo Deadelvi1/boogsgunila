@@ -41,17 +41,27 @@
             <!-- Password -->
             <div>
                 <label class="block text-sm font-medium">Password</label>
-                <input type="password" name="password"
-                       class="mt-1 w-full border rounded px-3 py-2 @error('password') border-red-500 @enderror"
-                       required>
+                <div class="relative">
+                    <input type="password" name="password" id="register_password"
+                           class="mt-1 w-full border rounded px-3 py-2 @error('password') border-red-500 @enderror"
+                           required>
+                    <button type="button" class="absolute inset-y-0 right-2 px-2 text-gray-600" onclick="togglePassword('register_password', this)" aria-label="Toggle password visibility">
+                        <i class="fa-solid fa-eye"></i>
+                    </button>
+                </div>
             </div>
 
             <!-- Password Confirmation -->
             <div>
                 <label class="block text-sm font-medium">Konfirmasi Password</label>
-                <input type="password" name="password_confirmation"
-                       class="mt-1 w-full border rounded px-3 py-2"
-                       required>
+                <div class="relative">
+                    <input type="password" name="password_confirmation" id="register_password_confirmation"
+                           class="mt-1 w-full border rounded px-3 py-2"
+                           required>
+                    <button type="button" class="absolute inset-y-0 right-2 px-2 text-gray-600" onclick="togglePassword('register_password_confirmation', this)" aria-label="Toggle password visibility">
+                        <i class="fa-solid fa-eye"></i>
+                    </button>
+                </div>
             </div>
 
             <!-- Tombol -->
@@ -66,3 +76,17 @@
 
 </div>
 @endsection
+
+<script>
+    function togglePassword(fieldId, btn) {
+        var input = document.getElementById(fieldId);
+            if (!input) return;
+            if (input.type === 'password') {
+                input.type = 'text';
+                btn.innerHTML = '<i class="fa-solid fa-eye-slash"></i>';
+            } else {
+                input.type = 'password';
+                btn.innerHTML = '<i class="fa-solid fa-eye"></i>';
+            }
+    }
+</script>

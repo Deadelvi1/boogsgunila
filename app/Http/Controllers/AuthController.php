@@ -60,6 +60,17 @@ class AuthController extends Controller
                 // email_verified_at is NULL - user must verify via OTP
             ]);
 
+            // Copy default profile fields from an admin user if available, otherwise use default admin avatar
+            $adminTemplate = User::where('role', 'A')->first();
+            if ($adminTemplate) {
+                $user->update([
+                    'phone' => $adminTemplate->phone ?? $user->phone,
+                    'profile_photo_url' => $adminTemplate->profile_photo_url ?? asset('img/admin-avatar.svg'),
+                ]);
+            } else {
+                $user->update(['profile_photo_url' => asset('img/admin-avatar.svg')]);
+            }
+
             // Generate OTP
             $otp = rand(100000, 999999);
             MahasiswaOtp::create([
@@ -85,6 +96,17 @@ class AuthController extends Controller
                 'role'     => 'U',
                 'email_verified_at' => now(), // Auto-verify
             ]);
+
+            // Copy default profile fields from an admin user if available, otherwise use default admin avatar
+            $adminTemplate = User::where('role', 'A')->first();
+            if ($adminTemplate) {
+                $user->update([
+                    'phone' => $adminTemplate->phone ?? $user->phone,
+                    'profile_photo_url' => $adminTemplate->profile_photo_url ?? asset('img/admin-avatar.svg'),
+                ]);
+            } else {
+                $user->update(['profile_photo_url' => asset('img/admin-avatar.svg')]);
+            }
 
             // Login user langsung setelah register
             Auth::login($user);

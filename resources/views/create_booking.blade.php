@@ -7,6 +7,17 @@
         <div class="bg-white shadow rounded p-6">
             <form action="{{ route('booking.store') }}" method="POST" class="space-y-4" enctype="multipart/form-data">
                 @csrf
+
+                @if ($errors->any())
+                    <div class="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded">
+                        <strong class="block font-semibold">Terjadi kesalahan:</strong>
+                        <ul class="list-disc pl-5 mt-2">
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
                 <div class="grid grid-cols-1 gap-4">
                     <div>
                         <label class="block text-sm font-medium mb-2">
@@ -152,6 +163,7 @@
                             <span class="text-red-600">*</span> Tanggal Mulai
                         </label>
                         <input type="date" name="date" id="date_start" value="{{ old('date', request('date')) }}" class="mt-1 w-full border rounded px-3 py-2" required>
+                        @error('date')<p class="text-red-600 text-sm mt-1">{{ $message }}</p>@enderror
                     </div>
                     <div>
                         <label class="block text-sm font-medium">Tanggal Selesai (opsional)</label>
@@ -166,12 +178,14 @@
                         </label>
                         <input type="time" name="start_time" id="start_time" value="{{ old('start_time', request('start_time')) }}" class="mt-1 w-full border rounded px-3 py-2" required oninput="validateTimes()">
                         <p id="time-error" class="text-red-600 text-sm mt-1 hidden"></p>
+                        @error('start_time')<p class="text-red-600 text-sm mt-1">{{ $message }}</p>@enderror
                     </div>
                     <div>
                         <label class="block text-sm font-medium">
                             <span class="text-red-600">*</span> Jam Selesai
                         </label>
                         <input type="time" name="end_time" id="end_time" value="{{ old('end_time', request('end_time')) }}" class="mt-1 w-full border rounded px-3 py-2" required oninput="validateTimes()">
+                        @error('end_time')<p class="text-red-600 text-sm mt-1">{{ $message }}</p>@enderror
                     </div>
                 </div>
                 

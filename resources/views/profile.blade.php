@@ -16,8 +16,8 @@
             <div class="p-8">
                 <div class="flex items-center space-x-8 mb-8">
                     <div class="flex-shrink-0">
-                        <div class="w-32 h-32 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
-                            <img src="{{ auth()->user()->profile_photo_url ?? asset('img/dea.png') }}" alt="Profile Photo" class="w-full h-full object-cover" data-default-src="{{ asset('img/dea.png') }}" onerror="this.src=this.dataset.defaultSrc">
+                            <div class="w-32 h-32 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
+                            <img src="{{ auth()->user()->profile_photo_url ?? asset('img/admin-avatar.svg') }}" alt="Profile Photo" class="w-full h-full object-cover" data-default-src="{{ asset('img/admin-avatar.svg') }}" onerror="this.src=this.dataset.defaultSrc">
                         </div>
                     </div>
                     <div>
@@ -69,9 +69,14 @@
                         <div class="space-y-4">
                             <div>
                                 <label for="current_password" class="block text-sm font-medium text-gray-700">Password Saat Ini</label>
-                                <input type="password" name="current_password" id="current_password" 
-                                       class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm
-                                              @error('current_password') border-red-500 @enderror">
+                                <div class="relative">
+                                    <input type="password" name="current_password" id="current_password" 
+                                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm
+                                                  @error('current_password') border-red-500 @enderror">
+                                    <button type="button" class="absolute inset-y-0 right-2 px-2 text-gray-600" onclick="togglePassword('current_password', this)" aria-label="Toggle password visibility">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </button>
+                                </div>
                                 @error('current_password')
                                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                 @enderror
@@ -79,9 +84,14 @@
 
                             <div>
                                 <label for="password" class="block text-sm font-medium text-gray-700">Password Baru</label>
-                                <input type="password" name="password" id="password" 
-                                       class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm
-                                              @error('password') border-red-500 @enderror">
+                                <div class="relative">
+                                    <input type="password" name="password" id="password" 
+                                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm
+                                                  @error('password') border-red-500 @enderror">
+                                    <button type="button" class="absolute inset-y-0 right-2 px-2 text-gray-600" onclick="togglePassword('password', this)" aria-label="Toggle password visibility">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </button>
+                                </div>
                                 @error('password')
                                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                 @enderror
@@ -89,8 +99,13 @@
 
                             <div>
                                 <label for="password_confirmation" class="block text-sm font-medium text-gray-700">Konfirmasi Password Baru</label>
-                                <input type="password" name="password_confirmation" id="password_confirmation" 
-                                       class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
+                                <div class="relative">
+                                    <input type="password" name="password_confirmation" id="password_confirmation" 
+                                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
+                                    <button type="button" class="absolute inset-y-0 right-2 px-2 text-gray-600" onclick="togglePassword('password_confirmation', this)" aria-label="Toggle password visibility">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -106,3 +121,17 @@
     </div>
 </div>
 @endsection
+
+<script>
+    function togglePassword(fieldId, btn) {
+        var input = document.getElementById(fieldId);
+        if (!input) return;
+            if (input.type === 'password') {
+                input.type = 'text';
+                btn.innerHTML = '<i class="fa-solid fa-eye-slash"></i>';
+            } else {
+                input.type = 'password';
+                btn.innerHTML = '<i class="fa-solid fa-eye"></i>';
+            }
+    }
+</script>

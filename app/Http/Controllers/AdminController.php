@@ -126,7 +126,21 @@ class AdminController extends Controller
 		if ($user->id === auth()->id()) {
 			return redirect()->route('admin.users.index')->with('error', 'Tidak dapat menghapus akun sendiri.');
 		}
-		$user->delete();
+
+		// Check if the user has any bookings. If so, return a friendly error instead of letting a DB exception happen.
+		$hasBookings = Booking::where('user_id', $user->id)->exists();
+		if ($hasBookings) {
+			return redirect()->route('admin.users.index')->with('error', 'Tidak dapat menghapus pengguna karena masih memiliki booking. Hapus atau batalkan booking terlebih dahulu.');
+		}
+
+		try {
+			$user->delete();
+		} catch (\Exception $e) {
+			// Log the exception for debugging and return a friendly message
+			\Log::error('Error deleting user '.$user->id.': '.$e->getMessage());
+			return redirect()->route('admin.users.index')->with('error', 'Terjadi kesalahan saat menghapus pengguna. Silakan coba lagi atau hubungi admin.');
+		}
+
 		return redirect()->route('admin.users.index')->with('success', 'Pengguna berhasil dihapus.');
 	}
 
