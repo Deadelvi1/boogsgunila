@@ -455,12 +455,21 @@ class AdminController extends Controller
 
 	// ========== PAYMENT ACCOUNT MANAGEMENT ==========
 	
-	public function paymentAccountsIndex()
+	public function paymentAccountsIndex(Request $request)
 	{
-		$accounts = \App\Models\PaymentAccount::orderBy('type')->orderBy('name')->get();
+		$q = $request->input('q');
+
+		$accounts = \App\Models\PaymentAccount::when($q, function($query) use ($q) {
+			$query->where('name', 'like', "%{$q}%")
+				  ->orWhere('account_number', 'like', "%{$q}%")
+				  ->orWhere('account_name', 'like', "%{$q}%")
+				  ->orWhere('type', 'like', "%{$q}%");
+		})->orderBy('type')->orderBy('name')->get();
+
 		return view('admin.payment_accounts.index', [
 			'title' => 'Kelola Rekening Pembayaran',
 			'accounts' => $accounts,
+ 			'q' => $q,
 		]);
 	}
 

@@ -12,11 +12,20 @@ class GedungController extends Controller
         $this->middleware(['auth', 'role:A']);
     }
 
-    public function index()
+    public function index(Request $request)
     {
+        $q = $request->input('q');
+
+        $items = Gedung::when($q, function($query) use ($q) {
+            $query->where('nama', 'like', "%{$q}%")
+                  ->orWhere('deskripsi', 'like', "%{$q}%")
+                  ->orWhere('lokasi', 'like', "%{$q}%");
+        })->orderBy('nama')->get();
+
         $data = [
             'title' => 'Gedung',
-            'items' => Gedung::all(),
+            'items' => $items,
+            'q' => $q,
         ];
         return view('admin.gedung.index', $data);
     }

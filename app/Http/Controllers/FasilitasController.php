@@ -12,13 +12,24 @@ class FasilitasController extends Controller
         return view('sewa.fasilitas', ['title' => 'Full Set Dekorasi Wisuda']);
     }
 
-    public function index()
+    public function index(Request $request)
     {
-        $data = [
+        $q = $request->input('q');
+
+        $items = Fasilitas::query()
+            ->when($q, function ($query) use ($q) {
+                $query->where(function ($sub) use ($q) {
+                    $sub->where('nama', 'like', "%{$q}%")
+                        ->orWhere('deskripsi', 'like', "%{$q}%");
+                });
+            })
+            ->orderBy('nama')
+            ->get();
+
+        return view('admin.fasilitas.index', [
             'title' => 'List Fasilitas',
-            'items' => Fasilitas::orderBy('nama')->get(),
-        ];
-        return view('admin.fasilitas.index', $data);
+            'items' => $items,
+        ]);
     }
 
     public function create()

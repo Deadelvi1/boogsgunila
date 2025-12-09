@@ -2,9 +2,10 @@
   "version": 2,
   "functions": {
     "api/index.php": {
-      "runtime": "vercel-php@0.6.2"
+      "runtime": "vercel-php@0.6.2",
+      "includeFiles": "**"
     }
   },
-  "buildCommand": "composer install --no-dev --optimize-autoloader && npm install && npm run build",
+  "buildCommand": "curl -sS https://getcomposer.org/installer | php && php composer.phar install --no-dev --optimize-autoloader && npm install && npm run build",
   "outputDirectory": "public"
 }
